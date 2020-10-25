@@ -1,0 +1,13 @@
+{
+  "name": "epic",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "fft.js": "^4.0.3"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.1",
+    "typescript": "^4.0.3"
+  }
+}
