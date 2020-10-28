@@ -21,10 +21,10 @@ function updateCanvasSize() {
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
 }
 
-window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
+window.addEventListener('resize', function () { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 
-canvas.onmousedown = function(e) {
+canvas.onmousedown = function (e) {
     if (e.button === 0) {
         hasCapture = true;
         canvas.setPointerCapture((e as PointerEvent).pointerId);
@@ -32,25 +32,25 @@ canvas.onmousedown = function(e) {
     }
 };
 
-canvas.ontouchstart = canvas.ontouchmove = function(e) {
+canvas.ontouchstart = canvas.ontouchmove = function (e) {
     if (e.touches.length === 1) {
         addPoint(e.changedTouches[0].clientX - canvas.offsetLeft, e.changedTouches[0].clientY - canvas.offsetTop);
         e.preventDefault();
     }
 };
 
-canvas.onmousemove = function(e) {
+canvas.onmousemove = function (e) {
     if (hasCapture) addPoint(e.offsetX, e.offsetY);
 };
 
-canvas.onmouseup = function(e) {
+canvas.onmouseup = function (e) {
     if (hasCapture) {
         hasCapture = false;
         canvas.releasePointerCapture((e as PointerEvent).pointerId);
     }
 };
 
-document.getElementById('clear-button')!.onclick = function() {
+document.getElementById('clear-button')!.onclick = function () {
     points.splice(0, points.length);
     unclosedLength = 0;
     unclosedPath = new Path2D();
@@ -59,7 +59,7 @@ document.getElementById('clear-button')!.onclick = function() {
 };
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameterSlider.oninput = function() {
+parameterSlider.oninput = function () {
     parameter = parameterSlider.valueAsNumber * Math.PI * 2 / 1000;
     redraw();
 };
@@ -102,8 +102,7 @@ function samplePathIntoInput() {
 
     const closedLength = unclosedLength + points[points.length - 1].segmentLength;
 
-    for (let i = 1; i < points.length; i++)
-    {
+    for (let i = 1; i < points.length; i++) {
         const point = points[i];
         lengthIncludingSegment += point.segmentLength;
 
@@ -129,7 +128,8 @@ function calculateSortedComponentsFromOutput() {
         components.push({
             frequency: i < fftSize / 2 ? i : i - fftSize,
             magnitude: magnitude(x, y) / fftSize,
-            phase: Math.atan2(y, x) });
+            phase: Math.atan2(y, x)
+        });
     }
 
     components.sort((a, b) => b.magnitude - a.magnitude);
