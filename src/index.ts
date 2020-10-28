@@ -152,13 +152,16 @@ function redraw() {
     if (components.length > 0) {
         context.beginPath();
 
-        let x = 0, y = 0;
+        let x = 0, y = 0, new_x, new_y;
 
         for (let i = 0; i < components.length && (complexity <= 0 || i <= complexity); i++) {
             const component = components[i];
             const angle = parameter * component.frequency + component.phase;
-            x += component.magnitude * Math.cos(angle);
-            y += component.magnitude * Math.sin(angle);
+            new_x = x + component.magnitude * Math.cos(angle);
+            new_y = y + component.magnitude * Math.sin(angle);
+            //draw arc(x, y, (x - new_x + y - new_y) / 2, 0, 2 * Math.PI) here
+            x = new_x;
+            y = new_y;
             context.lineTo(x, y);
         }
 
