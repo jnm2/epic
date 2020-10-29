@@ -152,17 +152,23 @@ function redraw() {
     if (components.length > 0) {
         context.beginPath();
 
-        let x = 0, y = 0, new_x, new_y;
+        let x = 0, y = 0, new_x, new_y, ray;
 
         for (let i = 0; i < components.length && (complexity <= 0 || i <= complexity); i++) {
             const component = components[i];
             const angle = parameter * component.frequency + component.phase;
             new_x = x + component.magnitude * Math.cos(angle);
             new_y = y + component.magnitude * Math.sin(angle);
-            //draw arc(x, y, (x - new_x + y - new_y) / 2, 0, 2 * Math.PI) here
+            if (i >= 1) { //draw arc for the first segment min
+                ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
+                context.moveTo(x + ray, y); //Move to the right most circle point (0°)
+                context.arc(x, y, ray, 0, 2 * Math.PI); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+                context.moveTo(x, y); //Move back at old x,y coords (the center of the circle)
+            }
+            context.lineTo(new_x, new_y); //Draw the line starting from old to new coords
+
             x = new_x;
             y = new_y;
-            context.lineTo(x, y);
         }
 
         context.strokeStyle = 'red';
