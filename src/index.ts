@@ -15,7 +15,7 @@ const components = new Array<{ frequency: number, magnitude: number, phase: numb
 const arcs = new Array<{ x: number, y: number, ray: number }>();
 let parameter = 0;
 let complexity = 0;
-let circles:boolean = false;
+let circles: boolean = false;
 let hasCapture = false;
 
 function updateCanvasSize() {
@@ -61,16 +61,19 @@ document.getElementById('clear-button')!.onclick = function () {
 };
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameterSlider.max = (fftSize - 1).toString();
 parameterSlider.oninput = function () {
-    parameter = parameterSlider.valueAsNumber * Math.PI * 2 / 1000;
+    parameter = parameterSlider.valueAsNumber * Math.PI * 2 / fftSize;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.max = fftSize.toString();
 complexityNumber.oninput = function () {
     complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+circles = complexityCircles.checked;
 complexityCircles.oninput = function () {
     circles = complexityCircles.checked;
     redraw();
