@@ -13,7 +13,7 @@ const input = fft.createComplexArray() as number[];
 const output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 let parameter = 0;
-
+let complexity = 0;
 let hasCapture = false;
 
 function updateCanvasSize() {
@@ -61,6 +61,11 @@ document.getElementById('clear-button')!.onclick = function () {
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.oninput = function () {
     parameter = parameterSlider.valueAsNumber * Math.PI * 2 / 1000;
+    redraw();
+};
+const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.oninput = function () {
+    complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 
@@ -149,7 +154,7 @@ function redraw() {
 
         let x = 0, y = 0;
 
-        for (let i = 0; i < components.length; i++) {
+        for (let i = 0; i < components.length && (complexity <= 0 || i <= complexity); i++) {
             const component = components[i];
             const angle = parameter * component.frequency + component.phase;
             x += component.magnitude * Math.cos(angle);
