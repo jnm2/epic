@@ -161,7 +161,7 @@ function redraw() {
 
     if (components.length > 0) {
 
-        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : complexity));
+        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1)));
 
         if (circles) {
             let new_x, new_y, ray;
