@@ -12,6 +12,7 @@ const fft = new FFT(fftSize);
 const input = fft.createComplexArray() as number[];
 const output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
+const arcs = new Array<{ x: number, y: number, ray: number }>();
 let parameter = 0;
 let complexity = 0;
 let hasCapture = false;
@@ -153,30 +154,42 @@ function redraw() {
 
         let x = 0, y = 0, new_x, new_y, ray;
 
+        context.beginPath(); //New drawing part
         for (let i = 0; i < components.length && (complexity <= 0 || i <= complexity); i++) {
             const component = components[i];
             const angle = parameter * component.frequency + component.phase;
             new_x = x + component.magnitude * Math.cos(angle);
             new_y = y + component.magnitude * Math.sin(angle);
-            context.beginPath(); //New drawing part
-            if (i >= 1) { //Draw arc? (min first segment)
-                ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
-
-                context.moveTo(x + ray, y); //Move to the right most circle point (0°)
-                context.arc(x, y, ray, 0, 2 * Math.PI); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
-                context.strokeStyle = 'burlywood';
-                context.stroke(); //Actually draw
-
-                context.beginPath(); //New drawing part
-                context.moveTo(x, y); //Move back at old x,y coords (the center of the circle)
+            if (false) {
+                if (i >= 1) { //Draw arc? (min first segment)
+                    ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
+                    arcs.push({
+                        x: x,
+                        y: y,
+                        ray: ray,
+                    })
+                }
+                else {
+                    arcs.splice(0, arcs.length); //Reset arcs
+                }
             }
+
             context.lineTo(new_x, new_y); //Draw the line starting from old to new coords
-            context.strokeStyle = 'red';
-            context.stroke(); //Actually draw
 
             x = new_x;
             y = new_y;
         }
+        context.strokeStyle = 'red';
+        context.stroke(); //Actually draw
 
+        context.beginPath(); //New drawing part
+        for (let i = 0; i < arcs.length; i++) {
+            context.moveTo(arcs[i].x + arcs[i].ray, arcs[i].y); //Move to the right most circle point (0°)
+            context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, 2 * Math.PI); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+        }
+        context.strokeStyle = 'burlywood';
+        context.stroke(); //Actually draw
+
+        arcs.splice(0, arcs.length); //Reset arcs
     }
 }
