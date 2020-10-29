@@ -15,6 +15,7 @@ const components = new Array<{ frequency: number, magnitude: number, phase: numb
 const arcs = new Array<{ x: number, y: number, ray: number }>();
 let parameter = 0;
 let complexity = 0;
+let circles:boolean = false;
 let hasCapture = false;
 
 function updateCanvasSize() {
@@ -67,6 +68,11 @@ parameterSlider.oninput = function () {
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
 complexityNumber.oninput = function () {
     complexity = complexityNumber.valueAsNumber;
+    redraw();
+};
+const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+complexityCircles.oninput = function () {
+    circles = complexityCircles.checked;
     redraw();
 };
 
@@ -160,7 +166,7 @@ function redraw() {
             const angle = parameter * component.frequency + component.phase;
             new_x = x + component.magnitude * Math.cos(angle);
             new_y = y + component.magnitude * Math.sin(angle);
-            if (false) {
+            if (circles) {
                 if (i >= 1) { //Draw arc? (min first segment)
                     ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
                     arcs.push({
