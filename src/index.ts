@@ -63,11 +63,11 @@ document.getElementById('clear-button')!.onclick = function () {
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.max = (fftSize - 1).toString();
 parameterSlider.oninput = function () {
-    parameter = parameterSlider.valueAsNumber * Math.PI * 2 / fftSize;
+    parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexityNumber.max = fftSize.toString();
+complexityNumber.max = (fftSize - 1).toString();
 complexityNumber.oninput = function () {
     complexity = complexityNumber.valueAsNumber;
     redraw();
@@ -161,17 +161,17 @@ function redraw() {
 
     if (components.length > 0) {
 
-        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1)));
+        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), p = (parameter * Math.PI * 2 / fftSize);
 
-        if (circles) {
+        if (circles) { //Draw arc?
             let new_x, new_y, ray;
-            context.beginPath(); //New drawing part
+            context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
-                const angle = parameter * component.frequency + component.phase;
+                const angle = p * component.frequency + component.phase;
                 new_x = x + component.magnitude * Math.cos(angle);
                 new_y = y + component.magnitude * Math.sin(angle);
-                if (i >= 1) { //Draw arc? (min first segment)
+                if (i >= 1) { //(min first segment)
                     ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
                     arcs.push({
                         x: x,
@@ -189,34 +189,34 @@ function redraw() {
                 y = new_y;
             }
             context.strokeStyle = 'red';
-            context.stroke(); //Actually draw
+            context.stroke();
 
-            context.beginPath(); //New drawing part
+            context.beginPath();
             for (let i = 0; i < arcs.length; i++) {
                 context.moveTo(arcs[i].x + arcs[i].ray, arcs[i].y); //Move to the right most circle point (0°)
                 context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, 2 * Math.PI); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
             }
             context.strokeStyle = 'burlywood';
-            context.stroke(); //Actually draw
+            context.stroke();
 
             arcs.splice(0, arcs.length); //Reset arcs
         }
         else {
-            context.beginPath(); //New drawing part
+            context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
-                const angle = parameter * component.frequency + component.phase;
+                const angle = p * component.frequency + component.phase;
                 x += component.magnitude * Math.cos(angle);
                 y += component.magnitude * Math.sin(angle);
-                context.lineTo(x, y); //Draw the line starting from old to new coords
+                context.lineTo(x, y);
             }
             context.strokeStyle = 'red';
-            context.stroke(); //Actually draw
+            context.stroke();
         }
 
-        if (complexity > 0) {
+        if (complexity > 0) { //Show complexity path
             context.beginPath();
-            for (let p = 0; p < fftSize; p++) { //fftSize
+            for (let p = 0; p < fftSize; p++) {
                 x = 0; y = 0;
                 for (let i = 0; i < maxI; i++) {
                     const component = components[i];
