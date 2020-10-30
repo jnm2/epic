@@ -182,7 +182,6 @@ function redraw() {
                 else {
                     arcs.splice(0, arcs.length); //Reset arcs
                 }
-
                 context.lineTo(new_x, new_y); //Draw the line starting from old to new coords
 
                 x = new_x;
@@ -203,31 +202,41 @@ function redraw() {
         }
         else {
             context.beginPath();
-            for (let i = 0; i < maxI; i++) {
-                const component = components[i];
-                const angle = p * component.frequency + component.phase;
-                x += component.magnitude * Math.cos(angle);
-                y += component.magnitude * Math.sin(angle);
-                context.lineTo(x, y);
-            }
+            drawComponentLineIn(maxI, p);
             context.strokeStyle = 'red';
             context.stroke();
         }
 
         if (complexity > 0) { //Show complexity path
             context.beginPath();
-            for (let p = 0; p < fftSize; p++) {
-                x = 0; y = 0;
-                for (let i = 0; i < maxI; i++) {
-                    const component = components[i];
-                    const angle = p * component.frequency + component.phase;
-                    x += component.magnitude * Math.cos(angle);
-                    y += component.magnitude * Math.sin(angle);
-                }
-                context.rect(x, y, 1, 1);
+            for (let cp = 0; cp < fftSize; cp++) {
+                drawComponentsLineOut(maxI, (cp * Math.PI * 2 / fftSize));
             }
+            drawComponentsLineOut(maxI, 0); //End loop
             context.strokeStyle = "green";
             context.stroke();
         }
+    }
+
+    function drawComponentLineIn(maxI, p) {
+        let x = 0, y = 0;
+        for (let i = 0; i < maxI; i++) {
+            const component = components[i];
+            const angle = p * component.frequency + component.phase;
+            x += component.magnitude * Math.cos(angle);
+            y += component.magnitude * Math.sin(angle);
+            context.lineTo(x, y);
+        }
+    }
+
+    function drawComponentsLineOut(maxI, p) {
+        let x = 0, y = 0;
+        for (let i = 0; i < maxI; i++) {
+            const component = components[i];
+            const angle = p * component.frequency + component.phase;
+            x += component.magnitude * Math.cos(angle);
+            y += component.magnitude * Math.sin(angle);
+        }
+        context.lineTo(x, y);
     }
 }
