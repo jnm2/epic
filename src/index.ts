@@ -213,5 +213,21 @@ function redraw() {
             context.strokeStyle = 'red';
             context.stroke(); //Actually draw
         }
+
+        if (complexity > 0) {
+            context.beginPath();
+            for (let p = 0; p < fftSize; p++) { //fftSize
+                x = 0; y = 0;
+                for (let i = 0; i < maxI; i++) {
+                    const component = components[i];
+                    const angle = p * component.frequency + component.phase;
+                    x += component.magnitude * Math.cos(angle);
+                    y += component.magnitude * Math.sin(angle);
+                }
+                context.rect(x, y, 1, 1);
+            }
+            context.strokeStyle = "green";
+            context.stroke();
+        }
     }
 }
