@@ -26,10 +26,10 @@ function updateCanvasSize() {
 window.addEventListener('resize', function () { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 
-canvas.onmousedown = function (e) {
+canvas.onpointerdown = function (e) {
     if (e.button === 0) {
         hasCapture = true;
-        //canvas.setPointerCapture((e as PointerEvent).pointerId);
+        canvas.setPointerCapture((e as PointerEvent).pointerId);
         addPoint(e.offsetX, e.offsetY);
     }
 };
@@ -41,14 +41,14 @@ canvas.ontouchstart = canvas.ontouchmove = function (e) {
     }
 };
 
-canvas.onmousemove = function (e) {
+canvas.onpointermove = function (e) {
     if (hasCapture) addPoint(e.offsetX, e.offsetY);
 };
 
-canvas.onmouseup = function (e) {
+canvas.onpointerup = function (e) {
     if (hasCapture) {
         hasCapture = false;
-        //canvas.releasePointerCapture((e as PointerEvent).pointerId);
+        canvas.releasePointerCapture((e as PointerEvent).pointerId);
     }
 };
 
