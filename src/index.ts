@@ -213,7 +213,7 @@ function redraw() {
                 drawComponentsLineOut(maxI, (cp * Math.PI * 2 / fftSize));
             }
             drawComponentsLineOut(maxI, 0); //End loop
-            context.strokeStyle = "green";
+            context.strokeStyle = 'green';
             context.stroke();
         }
     }
