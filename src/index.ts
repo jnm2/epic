@@ -62,12 +62,14 @@ document.getElementById('clear-button')!.onclick = function () {
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.max = (fftSize - 1).toString();
+parameter = parameterSlider.valueAsNumber;
 parameterSlider.oninput = function () {
     parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
 complexityNumber.max = (fftSize - 1).toString();
+complexity = complexityNumber.valueAsNumber;
 complexityNumber.oninput = function () {
     complexity = complexityNumber.valueAsNumber;
     redraw();
