@@ -1,4 +1,4 @@
-import FFT from 'fft.js'
+import FFT from 'fft.js';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const context = canvas.getContext('2d')!;
@@ -15,7 +15,7 @@ const components = new Array<{ frequency: number, magnitude: number, phase: numb
 const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
 let complexity = 0;
-let circles: boolean = false;
+let circles = false;
 let hasCapture = false;
 
 function updateCanvasSize() {
@@ -145,7 +145,7 @@ function calculateSortedComponentsFromOutput() {
         components.push({
             frequency: i < fftSize / 2 ? i : i - fftSize,
             magnitude: magnitude(x, y) / fftSize,
-            phase: Math.atan2(y, x)
+            phase: Math.atan2(y, x),
         });
     }
 
@@ -162,32 +162,31 @@ function redraw() {
     context.stroke(closedPath);
 
     if (components.length > 0) {
+        let x = 0, y = 0;
+        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
 
-        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
-
-        if (circles) { //Draw arcs?
-            let new_x, new_y, ray;
+        if (circles) { // Draw arcs?
+            let newX, newY, ray;
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
                 const angle = p * component.frequency + component.phase;
-                new_x = x + component.magnitude * Math.cos(angle);
-                new_y = y + component.magnitude * Math.sin(angle);
-                if (i >= 1) { //(min first segment)
-                    ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
-                    context.moveTo(x, y); //Move to the center, drawing a line to the right most circle point (0°)
-                    context.arc(x, y, ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
-                    //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
-                    //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
-                    //^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
+                newX = x + component.magnitude * Math.cos(angle);
+                newY = y + component.magnitude * Math.sin(angle);
+                if (i >= 1) { // (min first segment)
+                    ray = Math.sqrt(Math.pow(newX - x, 2) + Math.pow(newY - y, 2));
+                    context.moveTo(x, y); // Move to the center, drawing a line to the right most circle point (0Â°)
+                    context.arc(x, y, ray, 0, pi2); // Draw the circle starting from 0 rad (0Â°) to 2*PI rad (360Â°)
+                    // context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
+                    // context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
+                    // ^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
+                } else {
+                    lines.splice(0, lines.length); // Reset lines
                 }
-                else {
-                    lines.splice(0, lines.length); //Reset lines
-                }
-                lines.push({ x: new_x, y: new_y }); //Draw the line starting from old to new coords
+                lines.push({ x: newX, y: newY }); // Draw the line starting from old to new coords
 
-                x = new_x;
-                y = new_y;
+                x = newX;
+                y = newY;
             }
             context.strokeStyle = 'burlywood';
             context.stroke();
@@ -200,21 +199,20 @@ function redraw() {
             context.strokeStyle = 'red';
             context.stroke();
 
-            lines.splice(0, lines.length); //Reset lines
-        }
-        else {
+            lines.splice(0, lines.length); // Reset lines
+        } else {
             context.beginPath();
             drawComponentsLineIn(maxI, p);
             context.strokeStyle = 'red';
             context.stroke();
         }
 
-        if (complexity > 0) { //Show complexity path
+        if (complexity > 0) { // Show complexity path
             context.beginPath();
             for (let cp = 0; cp < fftSize; cp++) {
                 drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
             }
-            drawComponentsLineOut(maxI, 0); //End loop
+            drawComponentsLineOut(maxI, 0); // End loop
             context.strokeStyle = 'green';
             context.stroke();
         }
