@@ -1,0 +1,7 @@
+{
+  "extends": ["htmlvalidate:recommended", "html-validate:document"],
+  "rules": {
+    "input-missing-label": "off",
+    "require-sri": "off"
+  }
+}
