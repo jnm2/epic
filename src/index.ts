@@ -29,7 +29,7 @@ updateCanvasSize();
 canvas.onpointerdown = function (e) {
     if (e.button === 0) {
         hasCapture = true;
-        canvas.setPointerCapture((e as PointerEvent).pointerId);
+        canvas.setPointerCapture(e.pointerId);
         addPoint(e.offsetX, e.offsetY);
     }
 };
@@ -48,7 +48,7 @@ canvas.onpointermove = function (e) {
 canvas.onpointerup = function (e) {
     if (hasCapture) {
         hasCapture = false;
-        canvas.releasePointerCapture((e as PointerEvent).pointerId);
+        canvas.releasePointerCapture(e.pointerId);
     }
 };
 
