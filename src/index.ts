@@ -23,10 +23,10 @@ function updateCanvasSize() {
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
 }
 
-window.addEventListener('resize', function () { updateCanvasSize(); redraw(); });
+window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 
-canvas.onpointerdown = function (e) {
+canvas.onpointerdown = function(e) {
     if (e.button === 0) {
         hasCapture = true;
         canvas.setPointerCapture(e.pointerId);
@@ -34,25 +34,25 @@ canvas.onpointerdown = function (e) {
     }
 };
 
-canvas.ontouchstart = canvas.ontouchmove = function (e) {
+canvas.ontouchstart = canvas.ontouchmove = function(e) {
     if (e.touches.length === 1) {
         addPoint(e.changedTouches[0].clientX - canvas.offsetLeft, e.changedTouches[0].clientY - canvas.offsetTop);
         e.preventDefault();
     }
 };
 
-canvas.onpointermove = function (e) {
+canvas.onpointermove = function(e) {
     if (hasCapture) addPoint(e.offsetX, e.offsetY);
 };
 
-canvas.onpointerup = function (e) {
+canvas.onpointerup = function(e) {
     if (hasCapture) {
         hasCapture = false;
         canvas.releasePointerCapture(e.pointerId);
     }
 };
 
-document.getElementById('clear-button')!.onclick = function () {
+document.getElementById('clear-button')!.onclick = function() {
     points.splice(0, points.length);
     unclosedLength = 0;
     unclosedPath = new Path2D();
@@ -63,20 +63,20 @@ document.getElementById('clear-button')!.onclick = function () {
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.max = (fftSize - 1).toString();
 parameter = parameterSlider.valueAsNumber;
-parameterSlider.oninput = function () {
+parameterSlider.oninput = function() {
     parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
 complexityNumber.max = (fftSize - 1).toString();
 complexity = complexityNumber.valueAsNumber;
-complexityNumber.oninput = function () {
+complexityNumber.oninput = function() {
     complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
 circles = complexityCircles.checked;
-complexityCircles.oninput = function () {
+complexityCircles.oninput = function() {
     circles = complexityCircles.checked;
     redraw();
 };
