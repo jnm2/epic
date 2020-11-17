@@ -50,7 +50,7 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                         case (k === 'pt'):
                             let [x, y] = v.split(';');
                             if (x != null && y != null)
-                                addPoint(Number(x), Number(y));
+                                addPoint(Number(x), Number(y), false);
                             break;
 
                         case (k === 'range'):
@@ -97,6 +97,7 @@ function initControls() {
     complexity = complexityNumber.valueAsNumber;
 
     circles = complexityCircles.checked;
+    redraw();
 }
 
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
@@ -144,7 +145,7 @@ function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
 function lerp(first: number, second: number, t: number) { return first + (second - first) * t; }
 
-function addPoint(x: number, y: number) {
+function addPoint(x: number, y: number, draw: boolean = true) {
     if (points.length === 0) {
         points.push({ x, y, segmentLength: 0 });
         points.push({ x, y, segmentLength: 0 });
@@ -167,7 +168,7 @@ function addPoint(x: number, y: number) {
         components.splice(0, components.length);
     }
 
-    redraw();
+    if (draw) redraw();
 }
 
 function samplePathIntoInput() {
