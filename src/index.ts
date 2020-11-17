@@ -43,6 +43,16 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
             })
 }
 
+function setLocation() {
+    if (points.length > 0 && 'URLSearchParams' in window) {
+        let pointsString: string = '';
+        points.forEach(pt => pointsString += '&pt=' + pt.x + ';' + pt.y);
+
+        var newRelativePathQuery = window.location.pathname + '?' + pointsString;
+        history.pushState(null, '', newRelativePathQuery);
+    }
+}
+
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
@@ -80,6 +90,7 @@ document.getElementById('clear-button')!.onclick = function() {
     components.splice(0, components.length);
     redraw();
 };
+document.getElementById('save-button')!.onclick = setLocation;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.max = (fftSize - 1).toString();
