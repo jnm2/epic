@@ -7,10 +7,10 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-const fftSize = 4096;
-const fft = new FFT(fftSize);
-const input = fft.createComplexArray() as number[];
-const output = fft.createComplexArray() as number[];
+let fftSize = 4096;
+let fft = new FFT(fftSize);
+let input = fft.createComplexArray() as number[];
+let output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
@@ -58,6 +58,30 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                                 addPoint(Number(x), Number(y));
                             break;
 
+                        case (k === 'range'):
+                            parameterSlider.value = v;
+                            parameter = Number(v);
+                            break;
+
+                        case (k === 'circles'):
+                            complexityCircles.checked = Boolean(v);
+                            circles = Boolean(v);
+                            break;
+
+                        case (k === 'complexity'):
+                            complexityNumber.value = v;
+                            complexity = Number(v);
+                            break;
+
+                        case (k === 'fftsize'):
+                            fftSize = Number(v);
+                            parameterSlider.max = (fftSize - 1).toString();
+                            complexityNumber.max = (fftSize - 1).toString();
+                            fft = new FFT(fftSize);
+                            input = fft.createComplexArray() as number[];
+                            output = fft.createComplexArray() as number[];
+                            break;
+
                         default:
                             break;
                     }
@@ -70,7 +94,7 @@ function setLocation() {
         let pointsString: string = '';
         points.forEach(pt => pointsString += '&pt=' + pt.x + ';' + pt.y);
 
-        var newRelativePathQuery = window.location.pathname + '?' + pointsString;
+        var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'circles=' + circles + '&' + 'complexity=' + complexity + pointsString;
         history.pushState(null, '', newRelativePathQuery);
     }
 }
