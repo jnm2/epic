@@ -18,6 +18,22 @@ let complexity = 0;
 let circles: boolean = false;
 let hasCapture = false;
 
+const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameterSlider.oninput = function () {
+    parameter = parameterSlider.valueAsNumber;
+    redraw();
+};
+const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.oninput = function () {
+    complexity = complexityNumber.valueAsNumber;
+    redraw();
+};
+const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+complexityCircles.oninput = function () {
+    circles = complexityCircles.checked;
+    redraw();
+};
+
 function updateCanvasSize() {
     canvas.width = window.devicePixelRatio * canvas.clientWidth;
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
@@ -123,22 +139,6 @@ document.getElementById('clear-button')!.onclick = function() {
 };
 
 document.getElementById('save-button')!.onclick = setLocation;
-
-const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameterSlider.oninput = function () {
-    parameter = parameterSlider.valueAsNumber;
-    redraw();
-};
-const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexityNumber.oninput = function () {
-    complexity = complexityNumber.valueAsNumber;
-    redraw();
-};
-const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
-complexityCircles.oninput = function () {
-    circles = complexityCircles.checked;
-    redraw();
-};
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
