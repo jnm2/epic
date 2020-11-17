@@ -82,7 +82,8 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
 function setLocation() {
     if (points.length > 0 && 'URLSearchParams' in window) {
         let pointsString: string = '';
-        points.forEach(pt => pointsString += '&pt=' + pt.x + ';' + pt.y);
+        for (let i = 0; i < points.length - 1; i++)
+            pointsString += '&pt=' + points[i].x + ';' + points[i].y;
 
         var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + circles + pointsString;
         history.pushState(null, '', newRelativePathQuery);
