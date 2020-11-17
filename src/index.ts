@@ -12,7 +12,7 @@ const fft = new FFT(fftSize);
 const input = fft.createComplexArray() as number[];
 const output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
-const arcs = new Array<{ x: number, y: number, ray: number }>();
+const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
 let complexity = 0;
 let circles: boolean = false;
@@ -165,7 +165,7 @@ function redraw() {
 
         let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
 
-        if (circles) { //Draw arc?
+        if (circles) { //Draw arcs?
             let new_x, new_y, ray;
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
@@ -175,35 +175,32 @@ function redraw() {
                 new_y = y + component.magnitude * Math.sin(angle);
                 if (i >= 1) { //(min first segment)
                     ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
-                    arcs.push({
-                        x: x,
-                        y: y,
-                        ray: ray,
-                    })
+                    context.moveTo(x, y); //Move to the center, drawing a line to the right most circle point (0°)
+                    context.arc(x, y, ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+                    //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
+                    //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
+                    //^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
                 }
                 else {
-                    arcs.splice(0, arcs.length); //Reset arcs
+                    lines.splice(0, lines.length); //Reset lines
                 }
-                context.lineTo(new_x, new_y); //Draw the line starting from old to new coords
+                lines.push({ x: new_x, y: new_y }); //Draw the line starting from old to new coords
 
                 x = new_x;
                 y = new_y;
             }
-            context.strokeStyle = 'red';
-            context.stroke();
-
-            context.beginPath();
-            for (let i = 0; i < arcs.length; i++) {
-                context.moveTo(arcs[i].x, arcs[i].y); //Move to the center, drawing a line to the right most circle point (0°)
-                context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
-                //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
-                //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
-                //^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
-            }
             context.strokeStyle = 'burlywood';
             context.stroke();
 
-            arcs.splice(0, arcs.length); //Reset arcs
+            context.beginPath();
+            context.moveTo(lines[0].x, lines[0].y);
+            for (let i = 1; i < lines.length; i++) {
+                context.lineTo(lines[i].x, lines[i].y);
+            }
+            context.strokeStyle = 'red';
+            context.stroke();
+
+            lines.splice(0, lines.length); //Reset lines
         }
         else {
             context.beginPath();
