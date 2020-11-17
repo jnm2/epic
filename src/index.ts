@@ -18,6 +18,27 @@ let complexity = 0;
 let circles: boolean = false;
 let hasCapture = false;
 
+const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameterSlider.max = (fftSize - 1).toString();
+parameter = parameterSlider.valueAsNumber;
+parameterSlider.oninput = function () {
+    parameter = parameterSlider.valueAsNumber;
+    redraw();
+};
+const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.max = (fftSize - 1).toString();
+complexity = complexityNumber.valueAsNumber;
+complexityNumber.oninput = function () {
+    complexity = complexityNumber.valueAsNumber;
+    redraw();
+};
+const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+circles = complexityCircles.checked;
+complexityCircles.oninput = function () {
+    circles = complexityCircles.checked;
+    redraw();
+};
+
 function updateCanvasSize() {
     canvas.width = window.devicePixelRatio * canvas.clientWidth;
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
@@ -91,28 +112,8 @@ document.getElementById('clear-button')!.onclick = function() {
     components.splice(0, components.length);
     redraw();
 };
-document.getElementById('save-button')!.onclick = setLocation;
 
-const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameterSlider.max = (fftSize - 1).toString();
-parameter = parameterSlider.valueAsNumber;
-parameterSlider.oninput = function() {
-    parameter = parameterSlider.valueAsNumber;
-    redraw();
-};
-const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexityNumber.max = (fftSize - 1).toString();
-complexity = complexityNumber.valueAsNumber;
-complexityNumber.oninput = function() {
-    complexity = complexityNumber.valueAsNumber;
-    redraw();
-};
-const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
-circles = complexityCircles.checked;
-complexityCircles.oninput = function() {
-    circles = complexityCircles.checked;
-    redraw();
-};
+document.getElementById('save-button')!.onclick = setLocation;
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
