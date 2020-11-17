@@ -28,17 +28,18 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
         window.location.search.substr(1).split(`&`)
             .forEach(item => {
                 let [k, v] = item.split(`=`);
-                switch (true) {
-                    case (k === 'pt' && v != null): //Restriction to (valued) 'pt'
-                        v = v && decodeURIComponent(v);
+                if (v != null) { //Restriction to valued keys
+                    v = v && decodeURIComponent(v);
+                    switch (true) {
+                        case (k === 'pt'):
+                            let [x, y] = v.split(';');
+                            if (x != null && y != null)
+                                addPoint(Number(x), Number(y));
+                            break;
 
-                        let [x, y] = v.split(';');
-                        if (x != null && y != null)
-                            addPoint(Number(x), Number(y));
-                        break;
-
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
                 }
             })
 }
