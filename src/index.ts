@@ -12,8 +12,10 @@ const fft = new FFT(fftSize);
 const input = fft.createComplexArray() as number[];
 const output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
+const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
-
+let complexity = 0;
+let circles: boolean = false;
 let hasCapture = false;
 
 function updateCanvasSize() {
@@ -24,10 +26,10 @@ function updateCanvasSize() {
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 
-canvas.onmousedown = function(e) {
+canvas.onpointerdown = function(e) {
     if (e.button === 0) {
         hasCapture = true;
-        canvas.setPointerCapture((e as PointerEvent).pointerId);
+        canvas.setPointerCapture(e.pointerId);
         addPoint(e.offsetX, e.offsetY);
     }
 };
@@ -39,14 +41,14 @@ canvas.ontouchstart = canvas.ontouchmove = function(e) {
     }
 };
 
-canvas.onmousemove = function(e) {
+canvas.onpointermove = function(e) {
     if (hasCapture) addPoint(e.offsetX, e.offsetY);
 };
 
-canvas.onmouseup = function(e) {
+canvas.onpointerup = function(e) {
     if (hasCapture) {
         hasCapture = false;
-        canvas.releasePointerCapture((e as PointerEvent).pointerId);
+        canvas.releasePointerCapture(e.pointerId);
     }
 };
 
@@ -59,8 +61,23 @@ document.getElementById('clear-button')!.onclick = function() {
 };
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameterSlider.max = (fftSize - 1).toString();
+parameter = parameterSlider.valueAsNumber;
 parameterSlider.oninput = function() {
-    parameter = parameterSlider.valueAsNumber * Math.PI * 2 / 1000;
+    parameter = parameterSlider.valueAsNumber;
+    redraw();
+};
+const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.max = (fftSize - 1).toString();
+complexity = complexityNumber.valueAsNumber;
+complexityNumber.oninput = function() {
+    complexity = complexityNumber.valueAsNumber;
+    redraw();
+};
+const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+circles = complexityCircles.checked;
+complexityCircles.oninput = function() {
+    circles = complexityCircles.checked;
     redraw();
 };
 
@@ -102,8 +119,7 @@ function samplePathIntoInput() {
 
     const closedLength = unclosedLength + points[points.length - 1].segmentLength;
 
-    for (let i = 1; i < points.length; i++)
-    {
+    for (let i = 1; i < points.length; i++) {
         const point = points[i];
         lengthIncludingSegment += point.segmentLength;
 
@@ -129,7 +145,8 @@ function calculateSortedComponentsFromOutput() {
         components.push({
             frequency: i < fftSize / 2 ? i : i - fftSize,
             magnitude: magnitude(x, y) / fftSize,
-            phase: Math.atan2(y, x) });
+            phase: Math.atan2(y, x)
+        });
     }
 
     components.sort((a, b) => b.magnitude - a.magnitude);
@@ -145,19 +162,83 @@ function redraw() {
     context.stroke(closedPath);
 
     if (components.length > 0) {
-        context.beginPath();
 
+        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
+
+        if (circles) { //Draw arcs?
+            let new_x, new_y, ray;
+            context.beginPath();
+            for (let i = 0; i < maxI; i++) {
+                const component = components[i];
+                const angle = p * component.frequency + component.phase;
+                new_x = x + component.magnitude * Math.cos(angle);
+                new_y = y + component.magnitude * Math.sin(angle);
+                if (i >= 1) { //(min first segment)
+                    ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
+                    context.moveTo(x, y); //Move to the center, drawing a line to the right most circle point (0°)
+                    context.arc(x, y, ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+                    //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
+                    //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
+                    //^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
+                }
+                else {
+                    lines.splice(0, lines.length); //Reset lines
+                }
+                lines.push({ x: new_x, y: new_y }); //Draw the line starting from old to new coords
+
+                x = new_x;
+                y = new_y;
+            }
+            context.strokeStyle = 'burlywood';
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(lines[0].x, lines[0].y);
+            for (let i = 1; i < lines.length; i++) {
+                context.lineTo(lines[i].x, lines[i].y);
+            }
+            context.strokeStyle = 'red';
+            context.stroke();
+
+            lines.splice(0, lines.length); //Reset lines
+        }
+        else {
+            context.beginPath();
+            drawComponentsLineIn(maxI, p);
+            context.strokeStyle = 'red';
+            context.stroke();
+        }
+
+        if (complexity > 0) { //Show complexity path
+            context.beginPath();
+            for (let cp = 0; cp < fftSize; cp++) {
+                drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
+            }
+            drawComponentsLineOut(maxI, 0); //End loop
+            context.strokeStyle = 'green';
+            context.stroke();
+        }
+    }
+
+    function drawComponentsLineIn(maxI, p) {
         let x = 0, y = 0;
-
-        for (let i = 0; i < components.length; i++) {
+        for (let i = 0; i < maxI; i++) {
             const component = components[i];
-            const angle = parameter * component.frequency + component.phase;
+            const angle = p * component.frequency + component.phase;
             x += component.magnitude * Math.cos(angle);
             y += component.magnitude * Math.sin(angle);
             context.lineTo(x, y);
         }
+    }
 
-        context.strokeStyle = 'red';
-        context.stroke();
+    function drawComponentsLineOut(maxI, p) {
+        let x = 0, y = 0;
+        for (let i = 0; i < maxI; i++) {
+            const component = components[i];
+            const angle = p * component.frequency + component.phase;
+            x += component.magnitude * Math.cos(angle);
+            y += component.magnitude * Math.sin(angle);
+        }
+        context.lineTo(x, y);
     }
 }
