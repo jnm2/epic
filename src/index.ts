@@ -194,7 +194,7 @@ function redraw() {
 
             context.beginPath();
             for (let i = 0; i < arcs.length; i++) {
-                context.moveTo(arcs[i].x + arcs[i].ray, arcs[i].y); //Move to the right most circle point (0°)
+                context.moveTo(arcs[i].x, arcs[i].y); //Move to the center, drawing a line to the right most circle point (0°)
                 context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
                 //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
                 //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
