@@ -18,27 +18,6 @@ let complexity = 0;
 let circles: boolean = false;
 let hasCapture = false;
 
-const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameterSlider.max = (fftSize - 1).toString();
-parameter = parameterSlider.valueAsNumber;
-parameterSlider.oninput = function () {
-    parameter = parameterSlider.valueAsNumber;
-    redraw();
-};
-const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexityNumber.max = (fftSize - 1).toString();
-complexity = complexityNumber.valueAsNumber;
-complexityNumber.oninput = function () {
-    complexity = complexityNumber.valueAsNumber;
-    redraw();
-};
-const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
-circles = complexityCircles.checked;
-complexityCircles.oninput = function () {
-    circles = complexityCircles.checked;
-    redraw();
-};
-
 function updateCanvasSize() {
     canvas.width = window.devicePixelRatio * canvas.clientWidth;
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
@@ -60,23 +39,18 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
 
                         case (k === 'range'):
                             parameterSlider.value = v;
-                            parameter = Number(v);
                             break;
 
                         case (k === 'circles'):
                             complexityCircles.checked = Boolean(v);
-                            circles = Boolean(v);
                             break;
 
                         case (k === 'complexity'):
                             complexityNumber.value = v;
-                            complexity = Number(v);
                             break;
 
                         case (k === 'fftsize'):
                             fftSize = Number(v);
-                            parameterSlider.max = (fftSize - 1).toString();
-                            complexityNumber.max = (fftSize - 1).toString();
                             fft = new FFT(fftSize);
                             input = fft.createComplexArray() as number[];
                             output = fft.createComplexArray() as number[];
@@ -99,9 +73,20 @@ function setLocation() {
     }
 }
 
+function initControls() {
+    parameterSlider.max = (fftSize - 1).toString();
+    parameter = parameterSlider.valueAsNumber;
+
+    complexityNumber.max = (fftSize - 1).toString();
+    complexity = complexityNumber.valueAsNumber;
+
+    circles = complexityCircles.checked;
+}
+
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
+initControls();
 
 canvas.onpointerdown = function(e) {
     if (e.button === 0) {
@@ -138,6 +123,22 @@ document.getElementById('clear-button')!.onclick = function() {
 };
 
 document.getElementById('save-button')!.onclick = setLocation;
+
+const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameterSlider.oninput = function () {
+    parameter = parameterSlider.valueAsNumber;
+    redraw();
+};
+const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexityNumber.oninput = function () {
+    complexity = complexityNumber.valueAsNumber;
+    redraw();
+};
+const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+complexityCircles.oninput = function () {
+    circles = complexityCircles.checked;
+    redraw();
+};
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
