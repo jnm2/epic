@@ -163,7 +163,7 @@ function redraw() {
 
     if (components.length > 0) {
 
-        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), p = (parameter * Math.PI * 2 / fftSize);
+        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
 
         if (circles) { //Draw arc?
             let new_x, new_y, ray;
@@ -195,7 +195,10 @@ function redraw() {
             context.beginPath();
             for (let i = 0; i < arcs.length; i++) {
                 context.moveTo(arcs[i].x + arcs[i].ray, arcs[i].y); //Move to the right most circle point (0°)
-                context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, 2 * Math.PI); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+                context.arc(arcs[i].x, arcs[i].y, arcs[i].ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
+                //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
+                //context.arc(A, B, Math.Pi, 2 * Math.Pi) will draw a top-half circle (having it's center on [A, B]), with a line reaching [A, B] if the cursor was not already on this position.
+                //^ There is no use to begin circles from the [new_x, new_y] point, as it'd still require the ray calculation, and introduces a new angle -> angle + 2*PI calculation.
             }
             context.strokeStyle = 'burlywood';
             context.stroke();
@@ -204,7 +207,7 @@ function redraw() {
         }
         else {
             context.beginPath();
-            drawComponentLineIn(maxI, p);
+            drawComponentsLineIn(maxI, p);
             context.strokeStyle = 'red';
             context.stroke();
         }
@@ -212,7 +215,7 @@ function redraw() {
         if (complexity > 0) { //Show complexity path
             context.beginPath();
             for (let cp = 0; cp < fftSize; cp++) {
-                drawComponentsLineOut(maxI, (cp * Math.PI * 2 / fftSize));
+                drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
             }
             drawComponentsLineOut(maxI, 0); //End loop
             context.strokeStyle = 'green';
@@ -220,7 +223,7 @@ function redraw() {
         }
     }
 
-    function drawComponentLineIn(maxI, p) {
+    function drawComponentsLineIn(maxI, p) {
         let x = 0, y = 0;
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
