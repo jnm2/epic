@@ -23,8 +23,29 @@ function updateCanvasSize() {
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
 }
 
+function loadLocation() { //Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
+    if (window.location.search)
+        window.location.search.substr(1).split(`&`)
+            .forEach(item => {
+                let [k, v] = item.split(`=`);
+                switch (true) {
+                    case (k === 'pt' && v != null): //Restriction to (valued) 'pt'
+                        v = v && decodeURIComponent(v);
+
+                        let [x, y] = v.split(';');
+                        if (x != null && y != null)
+                            addPoint(Number(x), Number(y));
+                        break;
+
+                    default:
+                        break;
+                }
+            })
+}
+
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
+loadLocation();
 
 canvas.onpointerdown = function(e) {
     if (e.button === 0) {
