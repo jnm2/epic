@@ -153,7 +153,8 @@ function addPoint(x: number, y: number, draw: boolean = true) {
         const segmentLength = magnitude(x - previousPoint.x, y - previousPoint.y);
         unclosedLength += segmentLength;
         points[points.length - 1].segmentLength = segmentLength;
-        points.push({ x: x, y: y, segmentLength: magnitude(points[0].x - x, points[0].y - y) }); //Default : segment joins origin
+        const firstPoint = points[0];
+        points.push({ x: x, y: y, segmentLength: magnitude(firstPoint.x - x, firstPoint.y - y) }); //Store current point on top (instead of duplicating origin)
     }
 
     unclosedPath.lineTo(x, y);
