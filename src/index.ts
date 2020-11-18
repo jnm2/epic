@@ -84,7 +84,7 @@ function setLocation() {
         let pointsString: string = '';
         points.forEach(pt => pointsString += '&pt=' + pt.x + ';' + pt.y);
 
-        var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + circles + pointsString;
+        var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
         history.pushState(null, '', newRelativePathQuery);
     }
 }
