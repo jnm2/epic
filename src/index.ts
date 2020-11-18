@@ -173,13 +173,13 @@ function addPoint(x: number, y: number, draw: boolean = true) {
 function samplePathIntoInput() {
     let lengthIncludingSegment = 0;
 
-    let previousPoint = points[points.length - 1]; //'Previous' starts by being the current point.
+    let previousPoint = points[0];
     let segmentStartSample = 0;
 
-    const closedLength = unclosedLength + previousPoint.segmentLength;
+    const closedLength = unclosedLength + points[points.length - 1].segmentLength;
 
-    for (let i = 0; i < points.length; i++) {
-        const point = points[i];
+    for (let i = 1; i <= points.length; i++) {
+        const point = points[i == points.length ? 0: i]; //let's start from 1 again.
         lengthIncludingSegment += point.segmentLength;
 
         const segmentEndSample = Math.round(fftSize * lengthIncludingSegment / closedLength);
@@ -221,19 +221,18 @@ function redraw() {
     context.stroke(closedPath);
 
     if (components.length > 0) {
-
-        let x = 0, y = 0, maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
+        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
+        let x = 0, y = 0;
 
         if (circles) { //Draw arcs?
-            let new_x, new_y, ray;
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
                 const angle = p * component.frequency + component.phase;
-                new_x = x + component.magnitude * Math.cos(angle);
-                new_y = y + component.magnitude * Math.sin(angle);
+                const new_x = x + component.magnitude * Math.cos(angle);
+                const new_y = y + component.magnitude * Math.sin(angle);
                 if (i >= 1) { //(min first segment)
-                    ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
+                    const ray = Math.sqrt(Math.pow(new_x - x, 2) + Math.pow(new_y - y, 2));
                     context.moveTo(x, y); //Move to the center, drawing a line to the right most circle point (0°)
                     context.arc(x, y, ray, 0, pi2); //Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
                     //context.arc do take the x-rightmost point as 0rad, and pathes cursor from the previous position to the modulated position of the center+ray distance circle.
