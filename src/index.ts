@@ -58,7 +58,7 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                             break;
 
                         case (k === 'circles'):
-                            complexityCircles.checked = Boolean(v);
+                            complexityCircles.checked = Boolean(Number(v));
                             break;
 
                         case (k === 'complexity'):
