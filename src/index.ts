@@ -179,7 +179,7 @@ function samplePathIntoInput() {
     const closedLength = unclosedLength + points[points.length - 1].segmentLength;
 
     for (let i = 1; i <= points.length; i++) {
-        const point = points[i == points.length ? 0: i]; //let's start from 1 again.
+        const point = points[i % points.length]; //let's start from 1 again.
         lengthIncludingSegment += point.segmentLength;
 
         const segmentEndSample = Math.round(fftSize * lengthIncludingSegment / closedLength);
