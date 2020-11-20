@@ -90,7 +90,7 @@ function addPoint(x: number, y: number) {
         points.push({ x, y, segmentLength: 0 });
         points.push({ x, y, segmentLength: 0 });
     } else {
-        const previousPoint = points[points.length - 1];
+        const previousPoint = points[points.length - 2];
         const segmentLength = magnitude(x - previousPoint.x, y - previousPoint.y);
         unclosedLength += segmentLength;
         points[points.length - 1] = { x, y, segmentLength };
