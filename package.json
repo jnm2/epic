@@ -2,7 +2,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "yarn eslint src & yarn html-validate src",
-    "build": "yarn parcel build src/index.html",
+    "build": "yarn parcel build src/index.html --public-url .",
     "serve": "yarn parcel serve src/index.html"
   },
   "dependencies": {
