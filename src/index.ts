@@ -88,14 +88,16 @@ function lerp(first: number, second: number, t: number) { return first + (second
 function addPoint(x: number, y: number) {
     if (points.length === 0) {
         points.push({ x, y, segmentLength: 0 });
-        points.push({ x, y, segmentLength: 0 });
     } else {
-        const previousPoint = points[points.length - 1];
+        const previousPoint = points[Math.max(0, points.length - 2)];
         const segmentLength = magnitude(x - previousPoint.x, y - previousPoint.y);
         unclosedLength += segmentLength;
-        points[points.length - 1] = { x, y, segmentLength };
-        const firstPoint = points[0];
-        points.push({ x: firstPoint.x, y: firstPoint.y, segmentLength: magnitude(firstPoint.x - x, firstPoint.y - y) });
+
+        const addedPoint = { x, y, segmentLength };
+        points.splice(points.length - 1, 0, addedPoint);
+
+        const startAndEndPoint = points[points.length - 1];
+        startAndEndPoint.segmentLength = magnitude(startAndEndPoint.x - x, startAndEndPoint.y - y);
     }
 
     unclosedPath.lineTo(x, y);
@@ -112,14 +114,14 @@ function addPoint(x: number, y: number) {
 }
 
 function samplePathIntoInput() {
-    let lengthIncludingSegment = 0;
+    const startAndEndPoint = points[points.length - 1];
+    const closedLength = unclosedLength + startAndEndPoint.segmentLength;
 
-    let previousPoint = points[0];
+    let lengthIncludingSegment = 0;
+    let previousPoint = startAndEndPoint;
     let segmentStartSample = 0;
 
-    const closedLength = unclosedLength + points[points.length - 1].segmentLength;
-
-    for (let i = 1; i < points.length; i++) {
+    for (let i = 0; i < points.length; i++) {
         const point = points[i];
         lengthIncludingSegment += point.segmentLength;
 
