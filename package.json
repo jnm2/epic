@@ -1,12 +1,18 @@
 {
-  "name": "epic",
-  "version": "1.0.0",
-  "main": "src/index.js",
   "license": "MIT",
+  "scripts": {
+    "lint": "yarn eslint src & yarn html-validate src",
+    "build": "yarn parcel build src/index.html --public-url .",
+    "serve": "yarn parcel serve src/index.html"
+  },
   "dependencies": {
     "fft.js": "^4.0.3"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
+    "eslint": "^7.13.0",
+    "html-validate": "^4.0.0",
     "parcel": "^2.0.0-beta.1",
     "typescript": "^4.0.3"
   }
