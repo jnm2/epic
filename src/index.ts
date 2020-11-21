@@ -40,8 +40,7 @@ function updateCanvasSize() {
 }
 
 function loadLocation() { //Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
-    if (window.location.search)
-        window.location.search.substr(1).split(`&`)
+    window.location.search?.substr(1).split(`&`)
             .forEach(item => {
                 let [k, v] = item.split(`=`);
                 if (v != null) { //Restriction to valued keys
