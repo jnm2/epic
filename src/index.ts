@@ -19,17 +19,17 @@ let circles = false;
 let hasCapture = false;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameterSlider.oninput = function () {
+parameterSlider.oninput = function() {
     parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexityNumber.oninput = function () {
+complexityNumber.oninput = function() {
     complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
-complexityCircles.oninput = function () {
+complexityCircles.oninput = function() {
     circles = complexityCircles.checked;
     redraw();
 };
@@ -39,8 +39,8 @@ function updateCanvasSize() {
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
 }
 
-function loadLocation() { //Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
-    window.location.search?.substr(1).split(`&`)
+function loadLocation() { // Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
+    window.location.search?.substr(1).split('&')
         .forEach(item => {
             switch (item) {
                 case 'circles':
@@ -48,30 +48,30 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                     break;
 
                 default:
-                    let [k, v] = item.split(`=`);
-                    if (v != null) { //Restriction to valued keys
-                        v = v && decodeURIComponent(v);
+                    const [k, v] = item.split('=');
+                    if (v !== null) { // Restriction to valued keys
+                        const w = v && decodeURIComponent(v);
                         switch (true) {
                             case (k === 'pt'):
-                                let [x, y] = v.split(';');
-                                if (x != null && y != null)
+                                const [x, y] = w.split(';');
+                                if (x !== null && y !== null)
                                     addPoint(Number(x), Number(y), false);
                                 break;
 
                             case (k === 'range'):
-                                parameterSlider.value = v;
+                                parameterSlider.value = w;
                                 break;
 
                             case (k === 'circles'):
-                                complexityCircles.checked = Boolean(Number(v));
+                                complexityCircles.checked = Boolean(Number(w));
                                 break;
 
                             case (k === 'complexity'):
-                                complexityNumber.value = v;
+                                complexityNumber.value = w;
                                 break;
 
                             case (k === 'fftsize'):
-                                fftSize = Number(v);
+                                fftSize = Number(w);
                                 fft = new FFT(fftSize);
                                 input = fft.createComplexArray() as number[];
                                 output = fft.createComplexArray() as number[];
@@ -80,18 +80,18 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                     }
                     break;
             }
-            })
+        });
 }
 
 function setLocation() {
-    let pointsString: string = '';
+    let pointsString = '';
     if (points.length > 0)
-        for (let i = 0; i < points.length - 1; i++) {
+        for (let i = 0; i < points.length - 1; i++) { // Ignore the last point
             const pt = points[i];
             pointsString += '&pt=' + pt.x + ';' + pt.y;
         }
 
-    var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
     history.pushState(null, '', newRelativePathQuery);
 }
 
@@ -151,7 +151,7 @@ function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
 function lerp(first: number, second: number, t: number) { return first + (second - first) * t; }
 
-function addPoint(x: number, y: number, draw: boolean = true) {
+function addPoint(x: number, y: number, draw = true) {
     if (points.length === 0) {
         points.push({ x, y, segmentLength: 0 });
         points.push({ x, y, segmentLength: 0 });
@@ -231,14 +231,14 @@ function redraw() {
         const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
         let x = 0, y = 0;
 
-        if (circles) { //Draw arcs?
+        if (circles) { // Draw arcs?
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
                 const angle = p * component.frequency + component.phase;
                 const newX = x + component.magnitude * Math.cos(angle);
                 const newY = y + component.magnitude * Math.sin(angle);
-                if (i >= 1) { //(min first segment)
+                if (i >= 1) { // (min first segment)
                     const ray = Math.sqrt(Math.pow(newX - x, 2) + Math.pow(newY - y, 2));
                     context.moveTo(x, y); // Move to the center, drawing a line to the right most circle point (0°)
                     context.arc(x, y, ray, 0, pi2); // Draw the circle starting from 0 rad (0°) to 2*PI rad (360°)
