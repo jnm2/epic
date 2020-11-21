@@ -22,7 +22,9 @@
     "no-undef": "off",
     "no-var": "error",
     "no-whitespace-before-property": "error",
+    "object-curly-spacing": ["error", "always"],
     "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }],
+    "operator-linebreak": ["error", "before"],
     "padded-blocks": ["error", "never"],
     "semi-spacing": "error",
     "space-before-blocks": "error",
@@ -40,9 +42,11 @@
     "@typescript-eslint/no-extra-semi": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-expressions": "error",
+    "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/quotes": ["error", "single"],
     "@typescript-eslint/semi": "error",
     "@typescript-eslint/space-before-function-paren": ["error", { "anonymous": "never", "named": "never", "asyncArrow": "always" }],
-    "@typescript-eslint/space-infix-ops": "error"
+    "@typescript-eslint/space-infix-ops": "error",
+    "@typescript-eslint/type-annotation-spacing": "error"
   }
 }
