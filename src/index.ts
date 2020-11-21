@@ -220,7 +220,7 @@ function redraw() {
         }
     }
 
-    function drawComponentsLineIn(maxI, p) {
+    function drawComponentsLineIn(maxI: number, p: number) {
         let x = 0, y = 0;
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
@@ -231,7 +231,7 @@ function redraw() {
         }
     }
 
-    function drawComponentsLineOut(maxI, p) {
+    function drawComponentsLineOut(maxI: number, p: number) {
         let x = 0, y = 0;
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
