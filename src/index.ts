@@ -41,37 +41,45 @@ function updateCanvasSize() {
 
 function loadLocation() { //Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
     window.location.search?.substr(1).split(`&`)
-            .forEach(item => {
-                let [k, v] = item.split(`=`);
-                if (v != null) { //Restriction to valued keys
-                    v = v && decodeURIComponent(v);
-                    switch (true) {
-                        case (k === 'pt'):
-                            let [x, y] = v.split(';');
-                            if (x != null && y != null)
-                                addPoint(Number(x), Number(y), false);
-                            break;
+        .forEach(item => {
+            switch (item) {
+                case 'circles':
+                    complexityCircles.checked = true;
+                    break;
 
-                        case (k === 'range'):
-                            parameterSlider.value = v;
-                            break;
+                default:
+                    let [k, v] = item.split(`=`);
+                    if (v != null) { //Restriction to valued keys
+                        v = v && decodeURIComponent(v);
+                        switch (true) {
+                            case (k === 'pt'):
+                                let [x, y] = v.split(';');
+                                if (x != null && y != null)
+                                    addPoint(Number(x), Number(y), false);
+                                break;
 
-                        case (k === 'circles'):
-                            complexityCircles.checked = Boolean(Number(v));
-                            break;
+                            case (k === 'range'):
+                                parameterSlider.value = v;
+                                break;
 
-                        case (k === 'complexity'):
-                            complexityNumber.value = v;
-                            break;
+                            case (k === 'circles'):
+                                complexityCircles.checked = Boolean(Number(v));
+                                break;
 
-                        case (k === 'fftsize'):
-                            fftSize = Number(v);
-                            fft = new FFT(fftSize);
-                            input = fft.createComplexArray() as number[];
-                            output = fft.createComplexArray() as number[];
-                            break;
+                            case (k === 'complexity'):
+                                complexityNumber.value = v;
+                                break;
+
+                            case (k === 'fftsize'):
+                                fftSize = Number(v);
+                                fft = new FFT(fftSize);
+                                input = fft.createComplexArray() as number[];
+                                output = fft.createComplexArray() as number[];
+                                break;
+                        }
                     }
-                }
+                    break;
+            }
             })
 }
 
