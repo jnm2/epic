@@ -70,9 +70,6 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
                             input = fft.createComplexArray() as number[];
                             output = fft.createComplexArray() as number[];
                             break;
-
-                        default:
-                            break;
                     }
                 }
             })
