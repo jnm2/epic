@@ -84,13 +84,15 @@ function loadLocation() { //Inspiration from https://stackoverflow.com/questions
 }
 
 function setLocation() {
-    if (points.length > 0 && 'URLSearchParams' in window) {
-        let pointsString: string = '';
-        points.forEach(pt => pointsString += '&pt=' + pt.x + ';' + pt.y);
+    let pointsString: string = '';
+    if (points.length > 0)
+        for (let i = 0; i < points.length - 1; i++) {
+            const pt = points[i];
+            pointsString += '&pt=' + pt.x + ';' + pt.y;
+        }
 
-        var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
-        history.pushState(null, '', newRelativePathQuery);
-    }
+    var newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    history.pushState(null, '', newRelativePathQuery);
 }
 
 function initControls() {
