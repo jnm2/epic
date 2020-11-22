@@ -92,7 +92,7 @@ function setLocation() {
     if (points.length > 0)
         for (let i = 0; i < points.length - 1; i++) { // Ignore the last point
             const pt = points[i];
-            pointsString += '&pt=' + pt.x + ';' + pt.y;
+            pointsString += `&pt=${pt.x};${pt.y}`;
         }
 
     const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
