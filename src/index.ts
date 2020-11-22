@@ -125,7 +125,6 @@ canvas.onpointerdown = function(e) {
 
 canvas.ontouchstart = canvas.ontouchmove = function(e) {
     if (e.touches.length === 1) {
-        //addPoint(e.changedTouches[0].clientX - canvas.offsetLeft, e.changedTouches[0].clientY - canvas.offsetTop);
         e.preventDefault();
     }
 };
