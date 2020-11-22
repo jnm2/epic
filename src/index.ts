@@ -51,26 +51,26 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     const [k, v] = item.split('=');
                     if (v !== null) { // Restriction to valued keys
                         const w = v && decodeURIComponent(v);
-                        switch (true) {
-                            case (k === 'pt'):
+                        switch (k) {
+                            case 'pt':
                                 const [x, y] = w.split(';');
                                 if (x !== null && y !== null)
                                     addPoint(Number(x), Number(y), false);
                                 break;
 
-                            case (k === 'range'):
+                            case 'range':
                                 parameterSlider.value = w;
                                 break;
 
-                            case (k === 'circles'):
+                            case 'circles':
                                 complexityCircles.checked = Boolean(Number(w));
                                 break;
 
-                            case (k === 'complexity'):
+                            case 'complexity':
                                 complexityNumber.value = w;
                                 break;
 
-                            case (k === 'fftsize'):
+                            case 'fftsize':
                                 fftSize = Number(w);
                                 fft = new FFT(fftSize);
                                 input = fft.createComplexArray() as number[];
@@ -121,7 +121,7 @@ canvas.onpointerdown = function(e) {
 
 canvas.ontouchstart = canvas.ontouchmove = function(e) {
     if (e.touches.length === 1) {
-        addPoint(e.changedTouches[0].clientX - canvas.offsetLeft, e.changedTouches[0].clientY - canvas.offsetTop);
+        /:addPoint(e.changedTouches[0].clientX - canvas.offsetLeft, e.changedTouches[0].clientY - canvas.offsetTop);
         e.preventDefault();
     }
 };
