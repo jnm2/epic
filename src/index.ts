@@ -48,34 +48,38 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     break;
 
                 default:
-                    const [k, v] = item.split('=');
-                    if (v !== null) { // Restriction to valued keys
-                        const w = v && decodeURIComponent(v);
-                        switch (k) {
-                            case 'pt':
-                                const [x, y] = w.split(';');
-                                if (x !== null && y !== null)
-                                    addPoint(Number(x), Number(y), false);
-                                break;
+                    { // no-case-declaration
+                        const [k, v] = item.split('=');
+                        if (v !== null) { // Restriction to valued keys
+                            const w = v && decodeURIComponent(v);
+                            switch (k) {
+                                case 'pt':
+                                    { // no-case-declaration
+                                        const [x, y] = w.split(';');
+                                        if (x !== null && y !== null)
+                                            addPoint(Number(x), Number(y), false);
+                                    }
+                                    break;
 
-                            case 'range':
-                                parameterSlider.value = w;
-                                break;
+                                case 'range':
+                                    parameterSlider.value = w;
+                                    break;
 
-                            case 'circles':
-                                complexityCircles.checked = Boolean(Number(w));
-                                break;
+                                case 'circles':
+                                    complexityCircles.checked = Boolean(Number(w));
+                                    break;
 
-                            case 'complexity':
-                                complexityNumber.value = w;
-                                break;
+                                case 'complexity':
+                                    complexityNumber.value = w;
+                                    break;
 
-                            case 'fftsize':
-                                fftSize = Number(w);
-                                fft = new FFT(fftSize);
-                                input = fft.createComplexArray() as number[];
-                                output = fft.createComplexArray() as number[];
-                                break;
+                                case 'fftsize':
+                                    fftSize = Number(w);
+                                    fft = new FFT(fftSize);
+                                    input = fft.createComplexArray() as number[];
+                                    output = fft.createComplexArray() as number[];
+                                    break;
+                            }
                         }
                     }
                     break;
