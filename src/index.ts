@@ -7,7 +7,6 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-
 let fftSize = 4096;
 let fft = new FFT(fftSize);
 let input = fft.createComplexArray() as number[];
@@ -19,6 +18,7 @@ let complexity = 0;
 let circles = false;
 let hasCapture = false;
 let autoFft = true;
+let rawPoints = new Array<{ x: number, y: number }>();
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.oninput = function() {
@@ -63,7 +63,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     { // no-case-declaration
                                         const [x, y] = w.split(';');
                                         if (x !== null && y !== null)
-                                            addPoint(Number(x), Number(y), false);
+                                            rawPoints.push({ x: Number(x), y: Number(y) });
                                     }
                                     break;
 
@@ -82,9 +82,6 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                 case 'fftsize':
                                     autoFft = false;
                                     fftSize = Number(w);
-                                    fft = new FFT(fftSize);
-                                    input = fft.createComplexArray() as number[];
-                                    output = fft.createComplexArray() as number[];
                                     break;
 
                                 case 'autofft':
@@ -113,6 +110,15 @@ function setLocation() {
 function initControls() {
     const fftUnderSize = fftSize - 1, minParameter = Math.min(parameter, fftUnderSize), minComplexity = Math.min(complexity, fftUnderSize);
     circles = complexityCircles.checked;
+
+    fft = new FFT(fftSize);
+    input = fft.createComplexArray() as number[];
+    output = fft.createComplexArray() as number[];
+    points.splice(0, points.length);
+    unclosedLength = 0;
+    unclosedPath = new Path2D();
+    components.splice(0, components.length);
+    rawPoints.forEach(pt => addPoint(pt.x, pt.y));
 
     const redrawStart = window.performance.now();
     redraw(minComplexity, minParameter);
