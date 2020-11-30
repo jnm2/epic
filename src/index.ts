@@ -7,10 +7,7 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-let fftSize = 4096;
-let fft = new FFT(fftSize);
-let input = fft.createComplexArray() as number[];
-let output = fft.createComplexArray() as number[];
+let fftSize = 4096, fft: FFT, input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
@@ -112,12 +109,9 @@ function initControls() {
     circles = complexityCircles.checked;
 
     fft = new FFT(fftSize);
-    input = fft.createComplexArray() as number[];
-    output = fft.createComplexArray() as number[];
-    points.splice(0, points.length);
-    unclosedLength = 0;
-    unclosedPath = new Path2D();
-    components.splice(0, components.length);
+    input = fft.createComplexArray();
+    output = fft.createComplexArray();
+    pathReinitialization();
     rawPoints.forEach(pt => addPoint(pt.x, pt.y));
 
     const redrawStart = window.performance.now();
@@ -168,14 +162,18 @@ canvas.onpointerup = function(e) {
 };
 
 document.getElementById('clear-button')!.onclick = function() {
-    points.splice(0, points.length);
-    unclosedLength = 0;
-    unclosedPath = new Path2D();
-    components.splice(0, components.length);
+    pathReinitialization();
     redraw();
 };
 
 document.getElementById('save-button')!.onclick = setLocation;
+
+function pathReinitialization() {
+    points.splice(0, points.length);
+    unclosedLength = 0;
+    unclosedPath = new Path2D();
+    components.splice(0, components.length);
+}
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
