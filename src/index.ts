@@ -109,9 +109,9 @@ function initControls() {
 
     circles = complexityCircles.checked;
 
-    let redrawStart = window.performance.now();
+    const redrawStart = window.performance.now();
     redraw();
-    let redrawStop = window.performance.now();
+    const redrawStop = window.performance.now();
 
     if ((redrawStop - redrawStart) > 25 && fftSize > 2) {
         fftSize /= 2;
