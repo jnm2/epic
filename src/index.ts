@@ -67,7 +67,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'range':
-                                    parameterSlider.value = w;
+                                    parameter = Number(w);
                                     break;
 
                                 case 'circles':
@@ -75,7 +75,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'complexity':
-                                    complexityNumber.value = w;
+                                    complexity = Number(w);
                                     break;
 
                                 case 'fftsize':
@@ -110,25 +110,23 @@ function setLocation() {
 }
 
 function initControls() {
-    const fftUnderSize = fftSize - 1;
-    parameterSlider.max = fftUnderSize.toString();
-    parameter = Math.min(parameterSlider.valueAsNumber, fftUnderSize);
-
-    complexityNumber.max = fftUnderSize.toString();
-    complexity = Math.min(complexityNumber.valueAsNumber, fftUnderSize);
-
+    const fftUnderSize = fftSize - 1, minParameter = Math.min(parameter, fftUnderSize), minComplexity = Math.min(complexity, fftUnderSize);
     circles = complexityCircles.checked;
 
     const redrawStart = window.performance.now();
-    redraw();
+    redraw(minComplexity, minParameter);
     const redrawStop = window.performance.now();
 
     if (autoFft && (redrawStop - redrawStart) > 25 && fftSize > 2) {
         fftSize /= 2;
         initControls();
     } else {
-        parameterSlider.value = Math.min(parameter, fftUnderSize).toString();
-        complexityNumber.value = Math.min(complexity, fftUnderSize).toString();
+        parameterSlider.max = fftUnderSize.toString();
+        parameter = minParameter;
+        parameterSlider.value = parameter.toString();
+        complexityNumber.max = fftUnderSize.toString();
+        complexity = minComplexity;
+        complexityNumber.value = complexity.toString();
     }
 }
 
@@ -245,7 +243,7 @@ function calculateSortedComponentsFromOutput() {
     components.sort((a, b) => b.magnitude - a.magnitude);
 }
 
-function redraw() {
+function redraw(implexity: number = complexity, intrameter: number = parameter) {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
@@ -255,7 +253,7 @@ function redraw() {
     context.stroke(closedPath);
 
     if (components.length > 0) {
-        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
+        const maxI = Math.min(components.length, (implexity <= 0 ? components.length : (implexity + 1))), pi2 = 2 * Math.PI, p = (intrameter * pi2 / fftSize);
         let x = 0, y = 0;
 
         if (circles) { // Draw arcs?
@@ -299,7 +297,7 @@ function redraw() {
             context.stroke();
         }
 
-        if (complexity > 0) { // Show complexity path
+        if (implexity > 0) { // Show complexity path
             context.beginPath();
             for (let cp = 0; cp < fftSize; cp++) {
                 drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
