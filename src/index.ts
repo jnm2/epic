@@ -117,6 +117,10 @@ function initControls() {
         fftSize /= 2;
         initControls();
     }
+    else {
+        parameterSlider.value = Math.min(parameter, fftUnderSize).toString();
+        complexityNumber.value = Math.min(complexity, fftUnderSize).toString();
+    }
 }
 
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
