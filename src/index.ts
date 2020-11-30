@@ -17,6 +17,7 @@ let parameter = 0;
 let complexity = 0;
 let circles = false;
 let hasCapture = false;
+let autoFft = true;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameterSlider.oninput = function() {
@@ -47,6 +48,10 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     complexityCircles.checked = true;
                     break;
 
+                case 'autofft':
+                    autoFft = true;
+                    break;
+
                 default:
                     { // no-case-declaration
                         const [k, v] = item.split('=');
@@ -74,10 +79,15 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'fftsize':
+                                    autoFft = false;
                                     fftSize = Number(w);
                                     fft = new FFT(fftSize);
                                     input = fft.createComplexArray() as number[];
                                     output = fft.createComplexArray() as number[];
+                                    break;
+
+                                case 'autofft':
+                                    autoFft = Boolean(Number(w));
                                     break;
                             }
                         }
@@ -113,7 +123,7 @@ function initControls() {
     redraw();
     const redrawStop = window.performance.now();
 
-    if ((redrawStop - redrawStart) > 25 && fftSize > 2) {
+    if (autoFft && (redrawStop - redrawStart) > 25 && fftSize > 2) {
         fftSize /= 2;
         initControls();
     } else {
