@@ -108,7 +108,15 @@ function initControls() {
     complexity = Math.min(complexityNumber.valueAsNumber, fftUnderSize);
 
     circles = complexityCircles.checked;
+
+    let redraw_start = window.performance.now();
     redraw();
+    let redraw_stop = window.performance.now();
+
+    if ((redraw_stop - redraw_start) > 25 && fftSize > 2) {
+        fftSize /= 2;
+        initControls();
+    }
 }
 
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
