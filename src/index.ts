@@ -109,15 +109,14 @@ function initControls() {
 
     circles = complexityCircles.checked;
 
-    let redraw_start = window.performance.now();
+    let redrawStart = window.performance.now();
     redraw();
-    let redraw_stop = window.performance.now();
+    let redrawStop = window.performance.now();
 
-    if ((redraw_stop - redraw_start) > 25 && fftSize > 2) {
+    if ((redrawStop - redrawStart) > 25 && fftSize > 2) {
         fftSize /= 2;
         initControls();
-    }
-    else {
+    } else {
         parameterSlider.value = Math.min(parameter, fftUnderSize).toString();
         complexityNumber.value = Math.min(complexity, fftUnderSize).toString();
     }
