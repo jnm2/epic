@@ -100,10 +100,11 @@ function setLocation() {
 }
 
 function initControls() {
-    parameterSlider.max = (fftSize - 1).toString();
+    const fftUnderSize = fftSize - 1;
+    parameterSlider.max = fftUnderSize.toString();
     parameter = parameterSlider.valueAsNumber;
 
-    complexityNumber.max = (fftSize - 1).toString();
+    complexityNumber.max = fftUnderSize.toString();
     complexity = complexityNumber.valueAsNumber;
 
     circles = complexityCircles.checked;
