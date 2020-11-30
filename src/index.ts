@@ -102,10 +102,10 @@ function setLocation() {
 function initControls() {
     const fftUnderSize = fftSize - 1;
     parameterSlider.max = fftUnderSize.toString();
-    parameter = parameterSlider.valueAsNumber;
+    parameter = Math.min(parameterSlider.valueAsNumber, fftUnderSize);
 
     complexityNumber.max = fftUnderSize.toString();
-    complexity = complexityNumber.valueAsNumber;
+    complexity = Math.min(complexityNumber.valueAsNumber, fftUnderSize);
 
     circles = complexityCircles.checked;
     redraw();
