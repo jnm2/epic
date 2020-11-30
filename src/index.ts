@@ -7,6 +7,7 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
+
 let fftSize = 4096;
 let fft = new FFT(fftSize);
 let input = fft.createComplexArray() as number[];
@@ -117,7 +118,7 @@ function initControls() {
     redraw(minComplexity, minParameter);
     const redrawStop = window.performance.now();
 
-    if (autoFft && (redrawStop - redrawStart) > 25 && fftSize > 2) {
+    if (autoFft && (redrawStop - redrawStart) > 25 && fftSize > 4) {
         fftSize /= 2;
         initControls();
     } else {
