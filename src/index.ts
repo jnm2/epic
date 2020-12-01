@@ -7,7 +7,7 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-let fftSize = 4096, fft: FFT, input: number[], output: number[];
+let fftSize = 4, fft: FFT, input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
@@ -118,8 +118,8 @@ function initControls() {
     redraw(minComplexity, minParameter);
     const redrawStop = window.performance.now();
 
-    if (autoFft && (redrawStop - redrawStart) > 25 && fftSize > 4) {
-        fftSize /= 2;
+    if (autoFft && (redrawStop - redrawStart) * 2 < 25 && fftSize < 4096) {
+        fftSize *= 2;
         initControls();
     } else {
         parameterSlider.max = fftUnderSize.toString();
