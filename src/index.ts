@@ -9,7 +9,6 @@ let unclosedPath = new Path2D();
 
 let fftSize = 4, fft, input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
-const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
 let complexity = 0;
 let circles = false;
@@ -265,6 +264,7 @@ function redraw(implexity: number = complexity, intrameter: number = parameter) 
         let x = 0, y = 0;
 
         if (circles) { // Draw arcs?
+            const lines = new Array<{ x: number, y: number }>();
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
