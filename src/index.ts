@@ -29,7 +29,7 @@ const drawComponentsLineIn = (maxI: number, p: number) => {
         y += component.magnitude * Math.sin(angle);
         context.lineTo(x, y);
     }
-}
+};
 
 const drawComponentsLineOut = (maxI: number, p: number) => {
     let x = 0, y = 0;
@@ -40,7 +40,7 @@ const drawComponentsLineOut = (maxI: number, p: number) => {
         y += component.magnitude * Math.sin(angle);
     }
     context.lineTo(x, y);
-}
+};
 
 const redraw = (complexity: number = _complexity, parameter: number = _parameter) => {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
@@ -107,14 +107,14 @@ const redraw = (complexity: number = _complexity, parameter: number = _parameter
             context.stroke();
         }
     }
-}
+};
 
 const pathReinitialization = () => {
     points.splice(0, points.length);
     unclosedLength = 0;
     unclosedPath = new Path2D();
     components.splice(0, components.length);
-}
+};
 
 const samplePathIntoInput = () => {
     const startAndEndPoint = points[points.length - 1];
@@ -140,7 +140,7 @@ const samplePathIntoInput = () => {
         previousPoint = point;
         segmentStartSample = segmentEndSample;
     }
-}
+};
 
 const calculateSortedComponentsFromOutput = () => {
     components.splice(0, components.length);
@@ -155,7 +155,7 @@ const calculateSortedComponentsFromOutput = () => {
     }
 
     components.sort((a, b) => b.magnitude - a.magnitude);
-}
+};
 
 const addPoint = (x: number, y: number, draw = true) => {
     if (points.length === 0) {
@@ -183,7 +183,7 @@ const addPoint = (x: number, y: number, draw = true) => {
     }
 
     if (draw) redraw();
-}
+};
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 _parameter = parameterSlider.valueAsNumber;
@@ -207,7 +207,7 @@ complexityCircles.oninput = () => {
 const updateCanvasSize = () => {
     canvas.width = window.devicePixelRatio * canvas.clientWidth;
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
-}
+};
 
 const loadLocation = () => { // Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
     window.location.search?.substr(1).split('&')
@@ -261,9 +261,9 @@ const loadLocation = () => { // Inspiration from https://stackoverflow.com/quest
                     break;
             }
         });
-}
+};
 
-const setLocation= () => {
+const setLocation = () => {
     let pointsString = '';
     if (points.length > 0)
         for (let i = -1; i < points.length - 1; i++) {
@@ -273,7 +273,7 @@ const setLocation= () => {
 
     const newRelativePathQuery = window.location.pathname + '?' + 'range=' + _parameter + '&' + 'complexity=' + _complexity + '&' + 'circles=' + Number(circles) + pointsString;
     history.pushState(null, '', newRelativePathQuery);
-}
+};
 
 const initControls = () => {
     const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
@@ -300,7 +300,7 @@ const initControls = () => {
         complexityNumber.value = _complexity.toString();
         complexityCircles.checked = circles;
     }
-}
+};
 
 window.addEventListener('resize', () => { updateCanvasSize(); redraw(); });
 updateCanvasSize();
