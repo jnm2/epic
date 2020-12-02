@@ -18,16 +18,19 @@ let autoFft = true;
 let rawPoints = new Array<{ x: number, y: number }>();
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
+parameter = parameterSlider.valueAsNumber;
 parameterSlider.oninput = function() {
     parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
+complexity = complexityNumber.valueAsNumber;
 complexityNumber.oninput = function() {
     complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
+circles = complexityCircles.checked;
 complexityCircles.oninput = function() {
     circles = complexityCircles.checked;
     redraw();
@@ -69,7 +72,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'circles':
-                                    complexityCircles.checked = Boolean(Number(w));
+                                    circles = Boolean(Number(w));
                                     break;
 
                                 case 'complexity':
@@ -106,7 +109,6 @@ function setLocation() {
 
 function initControls() {
     const fftUnderSize = fftSize - 1, minParameter = Math.min(parameter, fftUnderSize), minComplexity = Math.min(complexity, fftUnderSize);
-    circles = complexityCircles.checked;
 
     fft = new FFT(fftSize);
     input = fft.createComplexArray();
@@ -128,6 +130,7 @@ function initControls() {
         complexityNumber.max = fftUnderSize.toString();
         complexity = minComplexity;
         complexityNumber.value = complexity.toString();
+        complexityCircles.checked = circles;
     }
 }
 
