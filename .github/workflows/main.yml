@@ -21,8 +21,8 @@ jobs:
           name: dist
           path: dist
 
-      - name: Lint
-        run: yarn lint
+      - name: Validate
+        run: yarn validate
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
