@@ -10,22 +10,22 @@ let unclosedPath = new Path2D();
 let fftSize = 4, fft = new FFT(fftSize), input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 const rawPoints = new Array<{ x: number, y: number }>();
-let parameter = 0;
-let complexity = 0;
+let _parameter = 0;
+let _complexity = 0;
 let circles = false;
 let hasCapture = false;
 let autoFft = true;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-parameter = parameterSlider.valueAsNumber;
+_parameter = parameterSlider.valueAsNumber;
 parameterSlider.oninput = function() {
-    parameter = parameterSlider.valueAsNumber;
+    _parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-complexity = complexityNumber.valueAsNumber;
+_complexity = complexityNumber.valueAsNumber;
 complexityNumber.oninput = function() {
-    complexity = complexityNumber.valueAsNumber;
+    _complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
@@ -67,7 +67,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'range':
-                                    parameter = Number(w);
+                                    _parameter = Number(w);
                                     break;
 
                                 case 'circles':
@@ -75,7 +75,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     break;
 
                                 case 'complexity':
-                                    complexity = Number(w);
+                                    _complexity = Number(w);
                                     break;
 
                                 case 'fftsize':
@@ -102,12 +102,12 @@ function setLocation() {
             pointsString += `&pt=${pt.x};${pt.y}`;
         }
 
-    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + _parameter + '&' + 'complexity=' + _complexity + '&' + 'circles=' + Number(circles) + pointsString;
     history.pushState(null, '', newRelativePathQuery);
 }
 
 function initControls() {
-    const fftUnderSize = fftSize - 1, minParameter = Math.min(parameter, fftUnderSize), minComplexity = Math.min(complexity, fftUnderSize);
+    const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
 
     fft = new FFT(fftSize);
     input = fft.createComplexArray();
@@ -124,11 +124,11 @@ function initControls() {
         initControls();
     } else {
         parameterSlider.max = fftUnderSize.toString();
-        parameter = minParameter;
-        parameterSlider.value = parameter.toString();
+        _parameter = minParameter;
+        parameterSlider.value = _parameter.toString();
         complexityNumber.max = fftUnderSize.toString();
-        complexity = minComplexity;
-        complexityNumber.value = complexity.toString();
+        _complexity = minComplexity;
+        complexityNumber.value = _complexity.toString();
         complexityCircles.checked = circles;
     }
 }
@@ -250,7 +250,7 @@ function calculateSortedComponentsFromOutput() {
     components.sort((a, b) => b.magnitude - a.magnitude);
 }
 
-function redraw(implexity: number = complexity, intrameter: number = parameter) {
+function redraw(complexity: number = _complexity, parameter: number = _parameter) {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
@@ -260,7 +260,7 @@ function redraw(implexity: number = complexity, intrameter: number = parameter) 
     context.stroke(closedPath);
 
     if (components.length > 0) {
-        const maxI = Math.min(components.length, (implexity <= 0 ? components.length : (implexity + 1))), pi2 = 2 * Math.PI, p = (intrameter * pi2 / fftSize);
+        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
         let x = 0, y = 0;
 
         if (circles) { // Draw arcs?
@@ -305,7 +305,7 @@ function redraw(implexity: number = complexity, intrameter: number = parameter) 
             context.stroke();
         }
 
-        if (implexity > 0) { // Show complexity path
+        if (complexity > 0) { // Show complexity path
             context.beginPath();
             for (let cp = 0; cp < fftSize; cp++) {
                 drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
