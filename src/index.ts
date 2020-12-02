@@ -16,6 +16,14 @@ let circles = false;
 let hasCapture = false;
 let autoFft = true;
 
+const resetFft = () => {
+    fft = new FFT(fftSize);
+    input = fft.createComplexArray();
+    output = fft.createComplexArray();
+    pathReinitialization();
+    rawPoints?.forEach(pt => addPoint(pt.x, pt.y, false));
+};
+
 const magnitude = (x: number, y: number) => Math.sqrt(x * x + y * y);
 
 const lerp = (first: number, second: number, t: number) => first + (second - first) * t;
@@ -278,11 +286,7 @@ const setLocation = () => {
 const initControls = () => {
     const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
 
-    fft = new FFT(fftSize);
-    input = fft.createComplexArray();
-    output = fft.createComplexArray();
-    pathReinitialization();
-    rawPoints?.forEach(pt => addPoint(pt.x, pt.y, false));
+    resetFft();
 
     const redrawStart = window.performance.now();
     redraw(minComplexity, minParameter);
