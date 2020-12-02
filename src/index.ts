@@ -7,14 +7,14 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-let fftSize = 4, fft: any, input: number[], output: number[];
+let fftSize = 4, fft = new FFT(fftSize), input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
+const rawPoints = new Array<{ x: number, y: number }>();
 let parameter = 0;
 let complexity = 0;
 let circles = false;
 let hasCapture = false;
 let autoFft = true;
-let rawPoints = new Array<{ x: number, y: number }>();
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 parameter = parameterSlider.valueAsNumber;
