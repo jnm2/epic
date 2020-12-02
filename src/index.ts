@@ -282,7 +282,7 @@ const initControls = () => {
     input = fft.createComplexArray();
     output = fft.createComplexArray();
     pathReinitialization();
-    rawPoints?.forEach(pt => addPoint(pt.x, pt.y));
+    rawPoints?.forEach(pt => addPoint(pt.x, pt.y, false));
 
     const redrawStart = window.performance.now();
     redraw(minComplexity, minParameter);
