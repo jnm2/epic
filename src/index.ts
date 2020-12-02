@@ -7,7 +7,7 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-let fftSize = 4, fft: FFT, input: number[], output: number[];
+let fftSize = 4, fft, input: number[], output: number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
 const lines = new Array<{ x: number, y: number }>();
 let parameter = 0;
