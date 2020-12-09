@@ -18,19 +18,19 @@ let autoFft = true;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
 _parameter = parameterSlider.valueAsNumber;
-parameterSlider.oninput = function () {
+parameterSlider.oninput = function() {
     _parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
 _complexity = complexityNumber.valueAsNumber;
-complexityNumber.oninput = function () {
+complexityNumber.oninput = function() {
     _complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
 circles = complexityCircles.checked;
-complexityCircles.oninput = function () {
+complexityCircles.oninput = function() {
     circles = complexityCircles.checked;
     redraw();
 };
@@ -38,7 +38,7 @@ complexityCircles.oninput = function () {
 function updateCanvasSize() {
     canvas.width = window.devicePixelRatio * canvas.clientWidth;
     canvas.height = window.devicePixelRatio * canvas.clientHeight;
-};
+}
 
 function loadLocation() { // Inspiration from https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/21152762#21152762 (qd's not stored)
     window.location.search?.substr(1).split('&')
@@ -92,7 +92,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     break;
             }
         });
-};
+}
 
 function setLocation() {
     let pointsString = '';
@@ -104,9 +104,9 @@ function setLocation() {
 
     const newRelativePathQuery = window.location.pathname + '?' + 'range=' + _parameter + '&' + 'complexity=' + _complexity + '&' + 'circles=' + Number(circles) + pointsString;
     history.pushState(null, '', newRelativePathQuery);
-};
+}
 
-function computeRedraw(computationCycle: number = 0) {
+function computeRedraw(computationCycle = 0) {
     const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
 
     resetFft();
@@ -115,14 +115,14 @@ function computeRedraw(computationCycle: number = 0) {
     } else {
         redraw(minComplexity, minParameter);
     }
-};
+}
 
-window.addEventListener('resize', function () { updateCanvasSize(); redraw(); });
+window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
 computeRedraw();
 
-canvas.onpointerdown = function (e) {
+canvas.onpointerdown = function(e) {
     if (e.button === 0) {
         hasCapture = true;
         canvas.setPointerCapture(e.pointerId);
@@ -131,27 +131,27 @@ canvas.onpointerdown = function (e) {
     }
 };
 
-canvas.ontouchstart = canvas.ontouchmove = function (e) {
+canvas.ontouchstart = canvas.ontouchmove = function(e) {
     if (e.touches.length === 1) {
         e.preventDefault();
     }
 };
 
-canvas.onpointermove = function (e) {
+canvas.onpointermove = function(e) {
     if (hasCapture) {
         rawPoints.push({ x: e.offsetX, y: e.offsetY });
         addPoint(e.offsetX, e.offsetY);
     }
 };
 
-canvas.onpointerup = function (e) {
+canvas.onpointerup = function(e) {
     if (hasCapture) {
         hasCapture = false;
         canvas.releasePointerCapture(e.pointerId);
     }
 };
 
-document.getElementById('clear-button')!.onclick = function () {
+document.getElementById('clear-button')!.onclick = function() {
     rawPoints?.splice(rawPoints.length);
     redraw();
 };
@@ -163,7 +163,7 @@ function resetFft() {
     input = fft.createComplexArray();
     output = fft.createComplexArray();
     pathReinitialization();
-};
+}
 
 function pathReinitialization() {
     points.splice(0, points.length);
@@ -171,11 +171,11 @@ function pathReinitialization() {
     unclosedPath = new Path2D();
     components.splice(0, components.length);
     rawPoints?.forEach(pt => addPoint(pt.x, pt.y, false));
-};
+}
 
-function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y) };
+function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
-function lerp(first: number, second: number, t: number) { return first + (second - first) * t };
+function lerp(first: number, second: number, t: number) { return first + (second - first) * t; }
 
 function addPoint(x: number, y: number, draw = true) {
     if (points.length === 0) {
@@ -203,7 +203,7 @@ function addPoint(x: number, y: number, draw = true) {
     }
 
     if (draw) redraw();
-};
+}
 
 function samplePathIntoInput() {
     const startAndEndPoint = points[points.length - 1];
@@ -229,7 +229,7 @@ function samplePathIntoInput() {
         previousPoint = point;
         segmentStartSample = segmentEndSample;
     }
-};
+}
 
 function calculateSortedComponentsFromOutput() {
     components.splice(0, components.length);
@@ -244,9 +244,9 @@ function calculateSortedComponentsFromOutput() {
     }
 
     components.sort((a, b) => b.magnitude - a.magnitude);
-};
+}
 
-function redraw(complexity: number = _complexity, parameter: number = _parameter, redrawStart?: number, computationCycle: number = 0) {
+function redraw(complexity: number = _complexity, parameter: number = _parameter, redrawStart?: number, computationCycle = 0) {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
@@ -335,7 +335,7 @@ function redraw(complexity: number = _complexity, parameter: number = _parameter
             complexityCircles.checked = circles;
         }
     }
-};
+}
 
 function drawComponentsLineIn(maxI: number, p: number) {
     let x = 0, y = 0;
@@ -346,7 +346,7 @@ function drawComponentsLineIn(maxI: number, p: number) {
         y += component.magnitude * Math.sin(angle);
         context.lineTo(x, y);
     }
-};
+}
 
 function drawComponentsLineOut(maxI: number, p: number) {
     let x = 0, y = 0;
@@ -357,4 +357,4 @@ function drawComponentsLineOut(maxI: number, p: number) {
         y += component.magnitude * Math.sin(angle);
     }
     context.lineTo(x, y);
-};
+}
