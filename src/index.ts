@@ -82,7 +82,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
 
                                 case 'cp':
                                     { // no-case-declaration
-                                        const [f, m, p] = w.split(";");
+                                        const [f, m, p] = w.split(';');
                                         if (f !== null && m !== null && p !== null)
                                             components.push({ frequency: Number(f), magnitude: Number(m), phase: Number(p) });
                                     }
@@ -320,7 +320,7 @@ function redraw() {
         }
     }
 
-    function drawComponentsLineIn(maxI: number, p: number, x: number = 0, y: number = 0) {
+    function drawComponentsLineIn(maxI: number, p: number, x: 0, y: 0) {
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
             const angle = p * component.frequency + component.phase;
@@ -330,7 +330,7 @@ function redraw() {
         }
     }
 
-    function drawComponentsLineOut(maxI: number, p: number, x: number = 0, y: number = 0) {
+    function drawComponentsLineOut(maxI: number, p: number, x: 0, y: 0) {
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
             const angle = p * component.frequency + component.phase;
