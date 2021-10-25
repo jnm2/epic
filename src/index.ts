@@ -148,7 +148,7 @@ document.getElementById('clear-button')!.onclick = function() {
     redraw();
 };
 
-document.getElementById('save-button')!.onclick = setLocation;
+document.getElementById('save-points-button')!.onclick = setLocation;
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
