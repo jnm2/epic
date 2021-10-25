@@ -7,29 +7,28 @@ const points = new Array<{ x: number, y: number, segmentLength: number }>();
 let unclosedLength = 0;
 let unclosedPath = new Path2D();
 
-let fftSize = 4, fft = new FFT(fftSize), input: number[], output: number[];
+let fftSize = 4096;
+let fft = new FFT(fftSize);
+let input = fft.createComplexArray() as number[];
+let output = fft.createComplexArray() as number[];
 const components = new Array<{ frequency: number, magnitude: number, phase: number }>();
-const rawPoints = new Array<{ x: number, y: number }>();
-let _parameter = 0;
-let _complexity = 0;
+const lines = new Array<{ x: number, y: number }>();
+let parameter = 0;
+let complexity = 0;
 let circles = false;
 let hasCapture = false;
-let autoFft = true;
 
 const parameterSlider = document.getElementById('parameter-slider') as HTMLInputElement;
-_parameter = parameterSlider.valueAsNumber;
 parameterSlider.oninput = function() {
-    _parameter = parameterSlider.valueAsNumber;
+    parameter = parameterSlider.valueAsNumber;
     redraw();
 };
 const complexityNumber = document.getElementById('complexity-number') as HTMLInputElement;
-_complexity = complexityNumber.valueAsNumber;
 complexityNumber.oninput = function() {
-    _complexity = complexityNumber.valueAsNumber;
+    complexity = complexityNumber.valueAsNumber;
     redraw();
 };
 const complexityCircles = document.getElementById('complexity-circles-check') as HTMLInputElement;
-circles = complexityCircles.checked;
 complexityCircles.oninput = function() {
     circles = complexityCircles.checked;
     redraw();
@@ -48,10 +47,6 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     complexityCircles.checked = true;
                     break;
 
-                case 'autofft':
-                    autoFft = true;
-                    break;
-
                 default:
                     { // no-case-declaration
                         const [k, v] = item.split('=');
@@ -62,29 +57,27 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     { // no-case-declaration
                                         const [x, y] = w.split(';');
                                         if (x !== null && y !== null)
-                                            rawPoints.push({ x: Number(x), y: Number(y) });
+                                            addPoint(Number(x), Number(y), false);
                                     }
                                     break;
 
                                 case 'range':
-                                    _parameter = Number(w);
+                                    parameterSlider.value = w;
                                     break;
 
                                 case 'circles':
-                                    circles = Boolean(Number(w));
+                                    complexityCircles.checked = Boolean(Number(w));
                                     break;
 
                                 case 'complexity':
-                                    _complexity = Number(w);
+                                    complexityNumber.value = w;
                                     break;
 
                                 case 'fftsize':
-                                    autoFft = false;
                                     fftSize = Number(w);
-                                    break;
-
-                                case 'autofft':
-                                    autoFft = Boolean(Number(w));
+                                    fft = new FFT(fftSize);
+                                    input = fft.createComplexArray() as number[];
+                                    output = fft.createComplexArray() as number[];
                                     break;
                             }
                         }
@@ -102,31 +95,30 @@ function setLocation() {
             pointsString += `&pt=${pt.x};${pt.y}`;
         }
 
-    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + _parameter + '&' + 'complexity=' + _complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
     history.pushState(null, '', newRelativePathQuery);
 }
 
-function computeRedraw(computationCycle = 0) {
-    const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
+function initControls() {
+    parameterSlider.max = (fftSize - 1).toString();
+    parameter = parameterSlider.valueAsNumber;
 
-    resetFft();
-    if (autoFft) {
-        redraw(minComplexity, minParameter, window.performance.now(), computationCycle);
-    } else {
-        redraw(minComplexity, minParameter);
-    }
+    complexityNumber.max = (fftSize - 1).toString();
+    complexity = complexityNumber.valueAsNumber;
+
+    circles = complexityCircles.checked;
+    redraw();
 }
 
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
-computeRedraw();
+initControls();
 
 canvas.onpointerdown = function(e) {
     if (e.button === 0) {
         hasCapture = true;
         canvas.setPointerCapture(e.pointerId);
-        rawPoints.push({ x: e.offsetX, y: e.offsetY });
         addPoint(e.offsetX, e.offsetY);
     }
 };
@@ -138,10 +130,7 @@ canvas.ontouchstart = canvas.ontouchmove = function(e) {
 };
 
 canvas.onpointermove = function(e) {
-    if (hasCapture) {
-        rawPoints.push({ x: e.offsetX, y: e.offsetY });
-        addPoint(e.offsetX, e.offsetY);
-    }
+    if (hasCapture) addPoint(e.offsetX, e.offsetY);
 };
 
 canvas.onpointerup = function(e) {
@@ -152,26 +141,14 @@ canvas.onpointerup = function(e) {
 };
 
 document.getElementById('clear-button')!.onclick = function() {
-    rawPoints?.splice(rawPoints.length);
-    redraw();
-};
-
-document.getElementById('save-button')!.onclick = setLocation;
-
-function resetFft() {
-    fft = new FFT(fftSize);
-    input = fft.createComplexArray();
-    output = fft.createComplexArray();
-    pathReinitialization();
-}
-
-function pathReinitialization() {
     points.splice(0, points.length);
     unclosedLength = 0;
     unclosedPath = new Path2D();
     components.splice(0, components.length);
-    rawPoints?.forEach(pt => addPoint(pt.x, pt.y, false));
-}
+    redraw();
+};
+
+document.getElementById('save-button')!.onclick = setLocation;
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
@@ -246,7 +223,7 @@ function calculateSortedComponentsFromOutput() {
     components.sort((a, b) => b.magnitude - a.magnitude);
 }
 
-function redraw(complexity: number = _complexity, parameter: number = _parameter, redrawStart?: number, computationCycle = 0) {
+function redraw() {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
@@ -260,7 +237,6 @@ function redraw(complexity: number = _complexity, parameter: number = _parameter
         let x = 0, y = 0;
 
         if (circles) { // Draw arcs?
-            const lines = new Array<{ x: number, y: number }>();
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
@@ -312,49 +288,25 @@ function redraw(complexity: number = _complexity, parameter: number = _parameter
         }
     }
 
-    if (redrawStart !== undefined) {
-        const redrawStop = window.performance.now(), redrawComputation = (redrawStop - redrawStart) * (rawPoints.length + 1) * 2; // redrawComputation measures on a per-point
-
-        if (redrawComputation < 25 && computationCycle < 10 && fftSize < Number.MAX_SAFE_INTEGER / 4) { // FftSize should grow?
-            fftSize *= 2;
-
-            computeRedraw(computationCycle + 1);
-        } else if (redrawComputation > 100 && computationCycle < 10 && fftSize > 4) { // FftSize should shrink?
-            fftSize /= 2;
-
-            computeRedraw(computationCycle + 1);
-        } else { // FftSize shouldn't either grow nor shrink, or went trough 10 computation cycles
-            const fftUnderSize = fftSize - 1, minParameter = Math.min(_parameter, fftUnderSize), minComplexity = Math.min(_complexity, fftUnderSize);
-
-            parameterSlider.max = fftUnderSize.toString();
-            _parameter = minParameter;
-            parameterSlider.value = _parameter.toString();
-            complexityNumber.max = fftUnderSize.toString();
-            _complexity = minComplexity;
-            complexityNumber.value = _complexity.toString();
-            complexityCircles.checked = circles;
+    function drawComponentsLineIn(maxI: number, p: number) {
+        let x = 0, y = 0;
+        for (let i = 0; i < maxI; i++) {
+            const component = components[i];
+            const angle = p * component.frequency + component.phase;
+            x += component.magnitude * Math.cos(angle);
+            y += component.magnitude * Math.sin(angle);
+            context.lineTo(x, y);
         }
     }
-}
 
-function drawComponentsLineIn(maxI: number, p: number) {
-    let x = 0, y = 0;
-    for (let i = 0; i < maxI; i++) {
-        const component = components[i];
-        const angle = p * component.frequency + component.phase;
-        x += component.magnitude * Math.cos(angle);
-        y += component.magnitude * Math.sin(angle);
+    function drawComponentsLineOut(maxI: number, p: number) {
+        let x = 0, y = 0;
+        for (let i = 0; i < maxI; i++) {
+            const component = components[i];
+            const angle = p * component.frequency + component.phase;
+            x += component.magnitude * Math.cos(angle);
+            y += component.magnitude * Math.sin(angle);
+        }
         context.lineTo(x, y);
     }
-}
-
-function drawComponentsLineOut(maxI: number, p: number) {
-    let x = 0, y = 0;
-    for (let i = 0; i < maxI; i++) {
-        const component = components[i];
-        const angle = p * component.frequency + component.phase;
-        x += component.magnitude * Math.cos(angle);
-        y += component.magnitude * Math.sin(angle);
-    }
-    context.lineTo(x, y);
 }
