@@ -87,7 +87,7 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
         });
 }
 
-function setLocation() {
+function setPointsLocation() {
     let pointsString = '';
     if (points.length > 0)
         for (let i = -1; i < points.length - 1; i++) {
@@ -95,7 +95,11 @@ function setLocation() {
             pointsString += `&pt=${pt.x};${pt.y}`;
         }
 
-    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    setLocation(pointsString);
+}
+
+function setLocation(complement: string) {
+    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + complement;
     history.pushState(null, '', newRelativePathQuery);
 }
 
@@ -148,7 +152,7 @@ document.getElementById('clear-button')!.onclick = function() {
     redraw();
 };
 
-document.getElementById('save-points-button')!.onclick = setLocation;
+document.getElementById('save-points-button')!.onclick = setPointsLocation;
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
