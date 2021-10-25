@@ -79,6 +79,14 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                                     input = fft.createComplexArray() as number[];
                                     output = fft.createComplexArray() as number[];
                                     break;
+
+                                case 'cp':
+                                    { // no-case-declaration
+                                        const [f, m, p] = w.split(';');
+                                        if (f !== null && m !== null && p !== null)
+                                            components.push({ frequency: Number(f), magnitude: Number(m), phase: Number(p) });
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -87,15 +95,36 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
         });
 }
 
-function setLocation() {
+function setPointsLocation() {
     let pointsString = '';
-    if (points.length > 0)
-        for (let i = -1; i < points.length - 1; i++) {
-            const pt = points[(i + points.length) % points.length]; // Starting by the last point
+    if (points.length > 0) {
+        const lastPt = points[points.length - 1];
+        pointsString += `&pt=${lastPt.x};${lastPt.y}`; // Starting by the last point (to close the loop)
+        const maxI = Math.min(256, points.length - 1), scaleI = points.length / maxI;
+        for (let i = 0; i < maxI; i++) {
+            const pt = points[Math.floor(i * scaleI)]; // Scaling resolution up to 256 pts
             pointsString += `&pt=${pt.x};${pt.y}`;
         }
+    }
 
-    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + pointsString;
+    setLocation(pointsString);
+}
+
+function setComponentsLocation() {
+    let componentsString = '';
+    if (components.length > 0) {
+        const maxI = Math.min(256, components.length - 1);
+        for (let i = 0; i < maxI; i++) {
+            const cp = components[i]; // Keeping resolution up to 256 components
+            componentsString += `&cp=${cp.frequency};${cp.magnitude};${cp.phase}`;
+        }
+    }
+
+    setLocation(componentsString);
+}
+
+function setLocation(complement: string) {
+    const newRelativePathQuery = window.location.pathname + '?' + 'range=' + parameter + '&' + 'complexity=' + complexity + '&' + 'circles=' + Number(circles) + complement;
     history.pushState(null, '', newRelativePathQuery);
 }
 
@@ -148,7 +177,8 @@ document.getElementById('clear-button')!.onclick = function() {
     redraw();
 };
 
-document.getElementById('save-button')!.onclick = setLocation;
+document.getElementById('save-points-button')!.onclick = setPointsLocation;
+document.getElementById('save-components-button')!.onclick = setComponentsLocation;
 
 function magnitude(x: number, y: number) { return Math.sqrt(x * x + y * y); }
 
@@ -227,16 +257,18 @@ function redraw() {
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     context.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-    const closedPath = new Path2D(unclosedPath);
-    closedPath.closePath();
-    context.strokeStyle = 'black';
-    context.stroke(closedPath);
+    if (unclosedLength > 0) {
+        const closedPath = new Path2D(unclosedPath);
+        closedPath.closePath();
+        context.strokeStyle = 'black';
+        context.stroke(closedPath);
+    }
 
     if (components.length > 0) {
-        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize);
-        let x = 0, y = 0;
+        const maxI = Math.min(components.length, (complexity <= 0 ? components.length : (complexity + 1))), pi2 = 2 * Math.PI, p = (parameter * pi2 / fftSize), _x = 0, _y = 0;
 
         if (circles) { // Draw arcs?
+            let x = _x, y = _y;
             context.beginPath();
             for (let i = 0; i < maxI; i++) {
                 const component = components[i];
@@ -272,7 +304,7 @@ function redraw() {
             lines.splice(0, lines.length); // Reset lines
         } else {
             context.beginPath();
-            drawComponentsLineIn(maxI, p);
+            drawComponentsLineIn(maxI, p, _x, _y);
             context.strokeStyle = 'red';
             context.stroke();
         }
@@ -280,16 +312,15 @@ function redraw() {
         if (complexity > 0) { // Show complexity path
             context.beginPath();
             for (let cp = 0; cp < fftSize; cp++) {
-                drawComponentsLineOut(maxI, (cp * pi2 / fftSize));
+                drawComponentsLineOut(maxI, (cp * pi2 / fftSize), _x, _y);
             }
-            drawComponentsLineOut(maxI, 0); // End loop
+            drawComponentsLineOut(maxI, 0, _x, _y); // End loop
             context.strokeStyle = 'green';
             context.stroke();
         }
     }
 
-    function drawComponentsLineIn(maxI: number, p: number) {
-        let x = 0, y = 0;
+    function drawComponentsLineIn(maxI: number, p: number, x: 0, y: 0) {
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
             const angle = p * component.frequency + component.phase;
@@ -299,8 +330,7 @@ function redraw() {
         }
     }
 
-    function drawComponentsLineOut(maxI: number, p: number) {
-        let x = 0, y = 0;
+    function drawComponentsLineOut(maxI: number, p: number, x: 0, y: 0) {
         for (let i = 0; i < maxI; i++) {
             const component = components[i];
             const angle = p * component.frequency + component.phase;
