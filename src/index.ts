@@ -157,6 +157,9 @@ class ComponentsManager {
     }
 
     addPoint(x: number, y: number) {
+        x = Math.round(x);
+        y = Math.round(y);
+
         if (this.points.length === 0)
             this.pushPoint({ x, y, segmentLength: 0 });
         else {
