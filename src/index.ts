@@ -313,22 +313,11 @@ function setLocation(complement: string | null) {
 }
 
 function encodeBtoa(setView: () => Float32Array) {
-    let binary = '';
-    const chunkSize = 0x8000, bytes = new Uint8Array(setView().buffer); // Buffer to deplete
-
-    for (let i = 0; i < bytes.length; i += chunkSize)
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize)); // bytes->binary
-
-    return btoa(binary);
+    return new Uint8Array(setView().buffer).toBase64({ alphabet: 'base64url', omitPadding: true });
 }
 
 function decodeBtoa(str: string, unsetView: (view: Float32Array) => void) {
-    const binary = atob(str);
-    const bytes = new Uint8Array(binary.length); // Buffer to complete
-
-    for (let i = 0; i < binary.length; i++)
-        bytes[i] = binary.charCodeAt(i); // binary->bytes
-
+    const bytes = Uint8Array.fromBase64(str, { alphabet: 'base64url' });
     return unsetView(new Float32Array(bytes.buffer));
 }
 
