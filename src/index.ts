@@ -177,98 +177,39 @@ class ComponentsManager {
             this.spliceComponents();
     }
 
-    setPointsLocation(encode: string | null): string | null {
+    setPointsLocation(): string | null {
         if (componentsManager.points.length <= 0)
             return null;
 
-        let pointsString: string;
-        switch (encode) {
-            case 'atob':
-            case 'btoa': { // no-case-declaration
-                const maxI = Math.min(4096, this.points.length);
-                pointsString = `&encode=${encode};pt;${encodeBtoa(() => {
-                    const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
-                    const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
-                    let i = 0;
-                    view[i] = lastPt.x; // Starting by the last point (to close the loop)
-                    view[i + 1] = lastPt.y;
-                    for (i = 1; i <= maxI; i++) {
-                        const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
-                        view[j] = pt.x;
-                        view[j + 1] = pt.y;
-                    }
-
-                    return view;
-                })}`;
-            }
-                break;
-
-            case 'btoa-na': { // no-case-declaration
-                const maxI = Math.min(4096, this.points.length);
-                pointsString = `&encode=${encode};pt;${encodeBtoa(() => {
-                    const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4)), scaleI = this.points.length / maxI;
-                    let lastPt: Xy = this.points[this.points.length - 1];
-                    let i = 0;
-                    view[i] = lastPt.x; // Starting by the last point (to close the loop)
-                    view[i + 1] = lastPt.y;
-                    for (i = 1; i <= maxI; i++) {
-                        const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
-                        view[j] = pt.x - lastPt.x;
-                        view[j + 1] = pt.y - lastPt.y; // Relative to the previous point (expected near)
-                        lastPt = pt;
-                    }
-
-                    return view;
-                })}`;
-            }
-                break;
-
-            default: { // no-case-declaration
-                const lastPt = this.points[this.points.length - 1];
-                pointsString = `&pt=|${lastPt.x};${lastPt.y}`; // Starting by the last point (to close the loop)
-                const maxI = Math.min(256, this.points.length - 1), scaleI = this.points.length / maxI;
-                for (let i = 0; i < maxI; i++) {
-                    const pt = this.points[Math.floor(i * scaleI)]; // Scaling resolution up to 256 pts
-                    pointsString += `|${pt.x};${pt.y}`;
-                }
-            }
+        const maxI = Math.min(4096, this.points.length);
+        const nbFloat32 = 2, view = new Float32Array(maxI * nbFloat32);
+        const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
+        let i = 0;
+        view[i] = lastPt.x; // Starting by the last point (to close the loop)
+        view[i + 1] = lastPt.y;
+        for (i = 1; i <= maxI; i++) {
+            const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
+            view[j] = pt.x;
+            view[j + 1] = pt.y;
         }
-        return pointsString;
+
+        return '&pt=' + base64UrlEncode(view.buffer);
     }
 
-    setComponentsLocation(encode: string | null): string | null {
+    setComponentsLocation(): string | null {
         if (this.components.length <= 0)
             return null;
 
-        let componentsString: string;
-        switch (encode) {
-            case 'atob':
-            case 'btoa': { // no-case-declaration
-                const maxI = Math.min(4096, this.components.length - 1);
-                componentsString = `&encode=${encode};cp;${encodeBtoa(() => {
-                    const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
-                    this.components.forEach((cp, i) => {
-                        const j = i * nbFloat32;
-                        view[j] = cp.frequency;
-                        view[j + 1] = cp.magnitude;
-                        view[j + 2] = cp.phase;
-                    });
+        const maxI = Math.min(4096, this.components.length - 1);
+        const nbFloat32 = 3, view = new Float32Array(maxI * nbFloat32);
+        this.components.forEach((cp, i) => {
+            const j = i * nbFloat32;
+            view[j] = cp.frequency;
+            view[j + 1] = cp.magnitude;
+            view[j + 2] = cp.phase;
+        });
 
-                    return view;
-                })}`;
-            }
-                break;
-
-            default: { // no-case-declaration
-                componentsString = '&cp=';
-                const maxI = Math.min(256, this.components.length - 1);
-                for (let i = 0; i < maxI; i++) {
-                    const cp = this.components[i]; // Keeping resolution up to 256 components
-                    componentsString += `|${cp.frequency};${cp.magnitude};${cp.phase}`;
-                }
-            }
-        }
-        return componentsString;
+        return '&cp=' + base64UrlEncode(view.buffer);
     }
 }
 
@@ -315,12 +256,12 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
 
                     const w = v && decodeURIComponent(v);
                     switch (k) {
-                        case 'pt':
-                            if (w.startsWith('|')) // format &pt=|;|;|...
-                                w.substring(1).split('|').forEach(loadPoint);
-                            else // format &pt=;&pt=;&pt=...
-                                loadPoint(w);
+                        case 'pt': {
+                            const view = new Float32Array(base64UrlDecode(w));
+                            for (let i = 0; i < view.length;)
+                                componentsManager.addPoint(view[i++], view[i++]);
                             break;
+                        }
 
                         case 'range':
                             parameterSlider.value = w;
@@ -338,18 +279,12 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                             fftManager.changeFftSize(Number(w));
                             break;
 
-                        case 'cp':
-                            if (w.startsWith('|')) // format &cp=|;;|;;|...
-                                w.substring(1).split('|').forEach(loadComponent);
-                            else // format &cp=;;&cp=;;&cp=...
-                                loadComponent(w);
+                        case 'cp': {
+                            const view = new Float32Array(base64UrlDecode(w));
+                            for (let i = 0; i < view.length;)
+                                componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
                             break;
-
-                        case 'encode': { // no-case-declaration
-                            const [e, t, c] = w.split(';');
-                            processDecode(c, t, e);
                         }
-                            break;
                     }
                 }
                     break;
@@ -357,24 +292,12 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
         });
 }
 
-function loadPoint(w: string) {
-    const [x, y] = w.split(';');
-    if (x !== null && y !== null)
-        componentsManager.addPoint(Number(x), Number(y));
+function setPointsLocation() {
+    setLocation(componentsManager.setPointsLocation());
 }
 
-function loadComponent(w: string) {
-    const [f, m, p] = w.split(';');
-    if (f !== null && m !== null && p !== null)
-        componentsManager.pushComponent({ frequency: Number(f), magnitude: Number(m), phase: Number(p) });
-}
-
-function setPointsLocation(encode: string | null = null) {
-    setLocation(componentsManager.setPointsLocation(encode));
-}
-
-function setComponentsLocation(encode: string | null = null) {
-    setLocation(componentsManager.setComponentsLocation(encode));
+function setComponentsLocation() {
+    setLocation(componentsManager.setComponentsLocation());
 }
 
 function setLocation(complement: string | null) {
@@ -385,68 +308,12 @@ function setLocation(complement: string | null) {
     history.pushState(null, '', newRelativePathQuery);
 }
 
-function encodeBtoa(setView: () => Float32Array) {
-    let binary = '';
-    const chunkSize = 0x8000, bytes = new Uint8Array(setView().buffer); // Buffer to deplete
-
-    for (let i = 0; i < bytes.length; i += chunkSize)
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize)); // bytes->binary
-
-    return btoa(binary);
+function base64UrlEncode(buffer: ArrayBufferLike) {
+    return new Uint8Array(buffer).toBase64({ alphabet: 'base64url', omitPadding: true });
 }
 
-function decodeBtoa(str: string, unsetView: (view: Float32Array) => void) {
-    const binary = atob(str);
-    const bytes = new Uint8Array(binary.length); // Buffer to complete
-
-    for (let i = 0; i < binary.length; i++)
-        bytes[i] = binary.charCodeAt(i); // binary->bytes
-
-    return unsetView(new Float32Array(bytes.buffer));
-}
-
-function processDecode(complement: string, type: string, encode: string | null) {
-    switch (encode) {
-        case 'atob':
-        case 'btoa':
-            switch (type) {
-                case 'pt':
-                    return decodeBtoa(complement, view => {
-                        for (let i = 0; i < view.length;)
-                            componentsManager.addPoint(view[i++], view[i++]);
-                    });
-
-                case 'cp':
-                    return decodeBtoa(complement, view => {
-                        for (let i = 0; i < view.length;)
-                            componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
-                    });
-
-                default:
-                    return atob(complement);
-            }
-
-        case 'btoa-na':
-            switch (type) {
-                case 'pt':
-                    return decodeBtoa(complement, view => {
-                        let iVw = 0;
-                        let prevPoint: Xy = { x: view[iVw++], y: view[iVw++] };
-                        componentsManager.addPoint(prevPoint.x, prevPoint.y); // First point is absolute
-                        for (; iVw < view.length;) { // i starts at 2
-                            const pt = { x: view[iVw++], y: view[iVw++] };
-                            prevPoint = { x: prevPoint.x + pt.x, y: prevPoint.y + pt.y }; // Relative to the previous point (expected near)
-                            componentsManager.addPoint(prevPoint.x, prevPoint.y);
-                        }
-                    });
-
-                default:
-                    return complement;
-            }
-
-        default:
-            return complement;
-    }
+function base64UrlDecode(str: string) {
+    return Uint8Array.fromBase64(str, { alphabet: 'base64url' }).buffer;
 }
 
 function initControls() {
@@ -495,10 +362,8 @@ document.getElementById('clear-button')!.onclick = function() {
     redraw();
 };
 
-document.getElementById('save-points-raw-button')!.onclick = () => setPointsLocation();
-document.getElementById('save-points-b64-button')!.onclick = () => setPointsLocation('btoa-na');
-document.getElementById('save-components-raw-button')!.onclick = () => setComponentsLocation();
-document.getElementById('save-components-b64-button')!.onclick = () => setComponentsLocation('btoa');
+document.getElementById('save-points-button')!.onclick = () => setPointsLocation();
+document.getElementById('save-components-button')!.onclick = () => setComponentsLocation();
 
 function push<T>(collection: T[], element: T) {
     return collection.push(element);
