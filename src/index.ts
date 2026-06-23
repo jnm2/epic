@@ -456,15 +456,14 @@ function initControls() {
 
     complexityNumber.max = fftUnderSize;
     parametersManager.complexity = complexityNumber.valueAsNumber;
-
-    parametersManager.circles = complexityCircles.checked;
-    redraw();
 }
 
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
 initControls();
+parametersManager.circles = complexityCircles.checked;
+redraw();
 
 canvas.onpointerdown = function(e) {
     if (e.button === 0) {
@@ -527,8 +526,10 @@ function addPoint(x: number, y: number) {
     const dt = performance.now() - t0;
     const changeFft = fftManager.adaptFft(dt);
     // console.log('FFT adapt:', { dt, changeFft, fftSize: fftManager.fftSize });
-    if (changeFft)
+    if (changeFft) {
         fftManager.changeFftSize(changeFft > 0 ? fftManager.fftSize << changeFft : fftManager.fftSize >> -changeFft);
+        initControls();
+    }
 }
 
 function redraw() {
