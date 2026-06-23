@@ -182,7 +182,7 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.points.length);
-        return `&encode=pt;${encodeBtoa(() => {
+        return `&pt=${encodeBtoa(() => {
             const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
             const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
             let i = 0;
@@ -203,7 +203,7 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.components.length - 1);
-        return `&encode=cp;${encodeBtoa(() => {
+        return `&cp=${encodeBtoa(() => {
             const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
             this.components.forEach((cp, i) => {
                 const j = i * nbFloat32;
@@ -261,10 +261,10 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                     const w = v && decodeURIComponent(v);
                     switch (k) {
                         case 'pt':
-                            if (w.startsWith('|')) // format &pt=|;|;|...
-                                w.substring(1).split('|').forEach(loadPoint);
-                            else // format &pt=;&pt=;&pt=...
-                                loadPoint(w);
+                            decodeBtoa(w, view => {
+                                for (let i = 0; i < view.length;)
+                                    componentsManager.addPoint(view[i++], view[i++]);
+                            });
                             break;
 
                         case 'range':
@@ -284,34 +284,16 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                             break;
 
                         case 'cp':
-                            if (w.startsWith('|')) // format &cp=|;;|;;|...
-                                w.substring(1).split('|').forEach(loadComponent);
-                            else // format &cp=;;&cp=;;&cp=...
-                                loadComponent(w);
-                            break;
-
-                        case 'encode': { // no-case-declaration
-                            const [t, c] = w.split(';');
-                            processDecode(c, t);
-                        }
+                            decodeBtoa(w, view => {
+                                for (let i = 0; i < view.length;)
+                                    componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
+                            });
                             break;
                     }
                 }
                     break;
             }
         });
-}
-
-function loadPoint(w: string) {
-    const [x, y] = w.split(';');
-    if (x !== null && y !== null)
-        componentsManager.addPoint(Number(x), Number(y));
-}
-
-function loadComponent(w: string) {
-    const [f, m, p] = w.split(';');
-    if (f !== null && m !== null && p !== null)
-        componentsManager.pushComponent({ frequency: Number(f), magnitude: Number(m), phase: Number(p) });
 }
 
 function setPointsLocation() {
@@ -348,25 +330,6 @@ function decodeBtoa(str: string, unsetView: (view: Float32Array) => void) {
         bytes[i] = binary.charCodeAt(i); // binary->bytes
 
     return unsetView(new Float32Array(bytes.buffer));
-}
-
-function processDecode(complement: string, type: string) {
-    switch (type) {
-        case 'pt':
-            return decodeBtoa(complement, view => {
-                for (let i = 0; i < view.length;)
-                    componentsManager.addPoint(view[i++], view[i++]);
-            });
-
-        case 'cp':
-            return decodeBtoa(complement, view => {
-                for (let i = 0; i < view.length;)
-                    componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
-            });
-
-        default:
-            return atob(complement);
-    }
 }
 
 function initControls() {
