@@ -182,20 +182,18 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.points.length);
-        return `&pt=${encodeBtoa(() => {
-            const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
-            const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
-            let i = 0;
-            view[i] = lastPt.x; // Starting by the last point (to close the loop)
-            view[i + 1] = lastPt.y;
-            for (i = 1; i <= maxI; i++) {
-                const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
-                view[j] = pt.x;
-                view[j + 1] = pt.y;
-            }
+        const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
+        const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
+        let i = 0;
+        view[i] = lastPt.x; // Starting by the last point (to close the loop)
+        view[i + 1] = lastPt.y;
+        for (i = 1; i <= maxI; i++) {
+            const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
+            view[j] = pt.x;
+            view[j + 1] = pt.y;
+        }
 
-            return view;
-        })}`;
+        return '&pt=' + base64UrlEncode(view.buffer);
     }
 
     setComponentsLocation(): string | null {
@@ -203,17 +201,15 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.components.length - 1);
-        return `&cp=${encodeBtoa(() => {
-            const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
-            this.components.forEach((cp, i) => {
-                const j = i * nbFloat32;
-                view[j] = cp.frequency;
-                view[j + 1] = cp.magnitude;
-                view[j + 2] = cp.phase;
-            });
+        const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
+        this.components.forEach((cp, i) => {
+            const j = i * nbFloat32;
+            view[j] = cp.frequency;
+            view[j + 1] = cp.magnitude;
+            view[j + 2] = cp.phase;
+        });
 
-            return view;
-        })}`;
+        return '&cp=' + base64UrlEncode(view.buffer);
     }
 }
 
@@ -260,12 +256,12 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
 
                     const w = v && decodeURIComponent(v);
                     switch (k) {
-                        case 'pt':
-                            decodeBtoa(w, view => {
-                                for (let i = 0; i < view.length;)
-                                    componentsManager.addPoint(view[i++], view[i++]);
-                            });
+                        case 'pt': {
+                            const view = new Float32Array(base64UrlDecode(w));
+                            for (let i = 0; i < view.length;)
+                                componentsManager.addPoint(view[i++], view[i++]);
                             break;
+                        }
 
                         case 'range':
                             parameterSlider.value = w;
@@ -283,12 +279,12 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                             fftManager.changeFftSize(Number(w));
                             break;
 
-                        case 'cp':
-                            decodeBtoa(w, view => {
-                                for (let i = 0; i < view.length;)
-                                    componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
-                            });
+                        case 'cp': {
+                            const view = new Float32Array(base64UrlDecode(w));
+                            for (let i = 0; i < view.length;)
+                                componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
                             break;
+                        }
                     }
                 }
                     break;
@@ -312,13 +308,12 @@ function setLocation(complement: string | null) {
     history.pushState(null, '', newRelativePathQuery);
 }
 
-function encodeBtoa(setView: () => Float32Array) {
-    return new Uint8Array(setView().buffer).toBase64({ alphabet: 'base64url', omitPadding: true });
+function base64UrlEncode(buffer: ArrayBufferLike) {
+    return new Uint8Array(buffer).toBase64({ alphabet: 'base64url', omitPadding: true });
 }
 
-function decodeBtoa(str: string, unsetView: (view: Float32Array) => void) {
-    const bytes = Uint8Array.fromBase64(str, { alphabet: 'base64url' });
-    return unsetView(new Float32Array(bytes.buffer));
+function base64UrlDecode(str: string) {
+    return Uint8Array.fromBase64(str, { alphabet: 'base64url' }).buffer;
 }
 
 function initControls() {
