@@ -449,7 +449,7 @@ function processDecode(complement: string, type: string, encode: string | null) 
     }
 }
 
-function syncFftControls() {
+function initControls() {
     const fftUnderSize = fftManager.fftUnderSize;
     parameterSlider.max = fftUnderSize;
     parametersManager.parameter = parameterSlider.valueAsNumber;
@@ -458,16 +458,12 @@ function syncFftControls() {
     parametersManager.complexity = complexityNumber.valueAsNumber;
 }
 
-function initControls() {
-    syncFftControls();
-    parametersManager.circles = complexityCircles.checked;
-    redraw();
-}
-
 window.addEventListener('resize', function() { updateCanvasSize(); redraw(); });
 updateCanvasSize();
 loadLocation();
 initControls();
+parametersManager.circles = complexityCircles.checked;
+redraw();
 
 canvas.onpointerdown = function(e) {
     if (e.button === 0) {
@@ -532,7 +528,7 @@ function addPoint(x: number, y: number) {
     // console.log('FFT adapt:', { dt, changeFft, fftSize: fftManager.fftSize });
     if (changeFft) {
         fftManager.changeFftSize(changeFft > 0 ? fftManager.fftSize << changeFft : fftManager.fftSize >> -changeFft);
-        syncFftControls();
+        initControls();
     }
 }
 
