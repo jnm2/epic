@@ -203,26 +203,6 @@ class ComponentsManager {
             }
                 break;
 
-            case 'btoa-na': { // no-case-declaration
-                const maxI = Math.min(4096, this.points.length);
-                pointsString = `&encode=${encode};pt;${encodeBtoa(() => {
-                    const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4)), scaleI = this.points.length / maxI;
-                    let lastPt: Xy = this.points[this.points.length - 1];
-                    let i = 0;
-                    view[i] = lastPt.x; // Starting by the last point (to close the loop)
-                    view[i + 1] = lastPt.y;
-                    for (i = 1; i <= maxI; i++) {
-                        const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
-                        view[j] = pt.x - lastPt.x;
-                        view[j + 1] = pt.y - lastPt.y; // Relative to the previous point (expected near)
-                        lastPt = pt;
-                    }
-
-                    return view;
-                })}`;
-            }
-                break;
-
             default: { // no-case-declaration
                 const lastPt = this.points[this.points.length - 1];
                 pointsString = `&pt=|${lastPt.x};${lastPt.y}`; // Starting by the last point (to close the loop)
@@ -426,24 +406,6 @@ function processDecode(complement: string, type: string, encode: string | null) 
                     return atob(complement);
             }
 
-        case 'btoa-na':
-            switch (type) {
-                case 'pt':
-                    return decodeBtoa(complement, view => {
-                        let iVw = 0;
-                        let prevPoint: Xy = { x: view[iVw++], y: view[iVw++] };
-                        componentsManager.addPoint(prevPoint.x, prevPoint.y); // First point is absolute
-                        for (; iVw < view.length;) { // i starts at 2
-                            const pt = { x: view[iVw++], y: view[iVw++] };
-                            prevPoint = { x: prevPoint.x + pt.x, y: prevPoint.y + pt.y }; // Relative to the previous point (expected near)
-                            componentsManager.addPoint(prevPoint.x, prevPoint.y);
-                        }
-                    });
-
-                default:
-                    return complement;
-            }
-
         default:
             return complement;
     }
@@ -497,7 +459,7 @@ document.getElementById('clear-button')!.onclick = function() {
 };
 
 document.getElementById('save-points-raw-button')!.onclick = () => setPointsLocation();
-document.getElementById('save-points-b64-button')!.onclick = () => setPointsLocation('btoa-na');
+document.getElementById('save-points-b64-button')!.onclick = () => setPointsLocation('btoa');
 document.getElementById('save-components-raw-button')!.onclick = () => setComponentsLocation();
 document.getElementById('save-components-b64-button')!.onclick = () => setComponentsLocation('btoa');
 
