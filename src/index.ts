@@ -177,78 +177,43 @@ class ComponentsManager {
             this.spliceComponents();
     }
 
-    setPointsLocation(encode: string | null): string | null {
+    setPointsLocation(): string | null {
         if (componentsManager.points.length <= 0)
             return null;
 
-        let pointsString: string;
-        switch (encode) {
-            case 'atob':
-            case 'btoa': { // no-case-declaration
-                const maxI = Math.min(4096, this.points.length);
-                pointsString = `&encode=${encode};pt;${encodeBtoa(() => {
-                    const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
-                    const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
-                    let i = 0;
-                    view[i] = lastPt.x; // Starting by the last point (to close the loop)
-                    view[i + 1] = lastPt.y;
-                    for (i = 1; i <= maxI; i++) {
-                        const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
-                        view[j] = pt.x;
-                        view[j + 1] = pt.y;
-                    }
-
-                    return view;
-                })}`;
+        const maxI = Math.min(4096, this.points.length);
+        return `&encode=pt;${encodeBtoa(() => {
+            const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
+            const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
+            let i = 0;
+            view[i] = lastPt.x; // Starting by the last point (to close the loop)
+            view[i + 1] = lastPt.y;
+            for (i = 1; i <= maxI; i++) {
+                const h = i - 1, j = i * nbFloat32, pt = this.points[Math.floor(h * scaleI)];
+                view[j] = pt.x;
+                view[j + 1] = pt.y;
             }
-                break;
 
-            default: { // no-case-declaration
-                const lastPt = this.points[this.points.length - 1];
-                pointsString = `&pt=|${lastPt.x};${lastPt.y}`; // Starting by the last point (to close the loop)
-                const maxI = Math.min(256, this.points.length - 1), scaleI = this.points.length / maxI;
-                for (let i = 0; i < maxI; i++) {
-                    const pt = this.points[Math.floor(i * scaleI)]; // Scaling resolution up to 256 pts
-                    pointsString += `|${pt.x};${pt.y}`;
-                }
-            }
-        }
-        return pointsString;
+            return view;
+        })}`;
     }
 
-    setComponentsLocation(encode: string | null): string | null {
+    setComponentsLocation(): string | null {
         if (this.components.length <= 0)
             return null;
 
-        let componentsString: string;
-        switch (encode) {
-            case 'atob':
-            case 'btoa': { // no-case-declaration
-                const maxI = Math.min(4096, this.components.length - 1);
-                componentsString = `&encode=${encode};cp;${encodeBtoa(() => {
-                    const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
-                    this.components.forEach((cp, i) => {
-                        const j = i * nbFloat32;
-                        view[j] = cp.frequency;
-                        view[j + 1] = cp.magnitude;
-                        view[j + 2] = cp.phase;
-                    });
+        const maxI = Math.min(4096, this.components.length - 1);
+        return `&encode=cp;${encodeBtoa(() => {
+            const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
+            this.components.forEach((cp, i) => {
+                const j = i * nbFloat32;
+                view[j] = cp.frequency;
+                view[j + 1] = cp.magnitude;
+                view[j + 2] = cp.phase;
+            });
 
-                    return view;
-                })}`;
-            }
-                break;
-
-            default: { // no-case-declaration
-                componentsString = '&cp=';
-                const maxI = Math.min(256, this.components.length - 1);
-                for (let i = 0; i < maxI; i++) {
-                    const cp = this.components[i]; // Keeping resolution up to 256 components
-                    componentsString += `|${cp.frequency};${cp.magnitude};${cp.phase}`;
-                }
-            }
-        }
-        return componentsString;
+            return view;
+        })}`;
     }
 }
 
@@ -326,8 +291,8 @@ function loadLocation() { // Inspiration from https://stackoverflow.com/question
                             break;
 
                         case 'encode': { // no-case-declaration
-                            const [e, t, c] = w.split(';');
-                            processDecode(c, t, e);
+                            const [t, c] = w.split(';');
+                            processDecode(c, t);
                         }
                             break;
                     }
@@ -349,12 +314,12 @@ function loadComponent(w: string) {
         componentsManager.pushComponent({ frequency: Number(f), magnitude: Number(m), phase: Number(p) });
 }
 
-function setPointsLocation(encode: string | null = null) {
-    setLocation(componentsManager.setPointsLocation(encode));
+function setPointsLocation() {
+    setLocation(componentsManager.setPointsLocation());
 }
 
-function setComponentsLocation(encode: string | null = null) {
-    setLocation(componentsManager.setComponentsLocation(encode));
+function setComponentsLocation() {
+    setLocation(componentsManager.setComponentsLocation());
 }
 
 function setLocation(complement: string | null) {
@@ -385,29 +350,22 @@ function decodeBtoa(str: string, unsetView: (view: Float32Array) => void) {
     return unsetView(new Float32Array(bytes.buffer));
 }
 
-function processDecode(complement: string, type: string, encode: string | null) {
-    switch (encode) {
-        case 'atob':
-        case 'btoa':
-            switch (type) {
-                case 'pt':
-                    return decodeBtoa(complement, view => {
-                        for (let i = 0; i < view.length;)
-                            componentsManager.addPoint(view[i++], view[i++]);
-                    });
+function processDecode(complement: string, type: string) {
+    switch (type) {
+        case 'pt':
+            return decodeBtoa(complement, view => {
+                for (let i = 0; i < view.length;)
+                    componentsManager.addPoint(view[i++], view[i++]);
+            });
 
-                case 'cp':
-                    return decodeBtoa(complement, view => {
-                        for (let i = 0; i < view.length;)
-                            componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
-                    });
-
-                default:
-                    return atob(complement);
-            }
+        case 'cp':
+            return decodeBtoa(complement, view => {
+                for (let i = 0; i < view.length;)
+                    componentsManager.pushComponent({ frequency: view[i++], magnitude: view[i++], phase: view[i++] });
+            });
 
         default:
-            return complement;
+            return atob(complement);
     }
 }
 
@@ -458,10 +416,8 @@ document.getElementById('clear-button')!.onclick = function() {
     redraw();
 };
 
-document.getElementById('save-points-raw-button')!.onclick = () => setPointsLocation();
-document.getElementById('save-points-b64-button')!.onclick = () => setPointsLocation('btoa');
-document.getElementById('save-components-raw-button')!.onclick = () => setComponentsLocation();
-document.getElementById('save-components-b64-button')!.onclick = () => setComponentsLocation('btoa');
+document.getElementById('save-points-button')!.onclick = () => setPointsLocation();
+document.getElementById('save-components-button')!.onclick = () => setComponentsLocation();
 
 function push<T>(collection: T[], element: T) {
     return collection.push(element);
