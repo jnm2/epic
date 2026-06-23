@@ -182,7 +182,7 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.points.length);
-        const nbFloat32 = 2, view = new Float32Array(new ArrayBuffer(maxI * nbFloat32 * 4));
+        const nbFloat32 = 2, view = new Float32Array(maxI * nbFloat32);
         const lastPt = this.points[this.points.length - 1], scaleI = this.points.length / maxI;
         let i = 0;
         view[i] = lastPt.x; // Starting by the last point (to close the loop)
@@ -201,7 +201,7 @@ class ComponentsManager {
             return null;
 
         const maxI = Math.min(4096, this.components.length - 1);
-        const nbFloat32 = 3, view = new Float32Array(new ArrayBuffer(maxI * 3 * 4)); // RangeError: byte length of Float32Array should be a multiple of 4 (needs a padding to be at complete 4)
+        const nbFloat32 = 3, view = new Float32Array(maxI * nbFloat32);
         this.components.forEach((cp, i) => {
             const j = i * nbFloat32;
             view[j] = cp.frequency;
