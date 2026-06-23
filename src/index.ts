@@ -470,7 +470,7 @@ canvas.onpointerdown = function(e) {
     if (e.button === 0) {
         parametersManager.hasCapture = true;
         canvas.setPointerCapture(e.pointerId);
-        addPoint(e.clientX, e.clientY);
+        addPoint(e.offsetX, e.offsetY);
     }
 };
 
@@ -481,7 +481,7 @@ canvas.ontouchstart = canvas.ontouchmove = function(e) {
 
 canvas.onpointermove = function(e) {
     if (parametersManager.hasCapture)
-        addPoint(e.clientX, e.clientY);
+        addPoint(e.offsetX, e.offsetY);
 };
 
 canvas.onpointerup = function(e) {
