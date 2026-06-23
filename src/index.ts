@@ -527,8 +527,14 @@ function addPoint(x: number, y: number) {
     const dt = performance.now() - t0;
     const changeFft = fftManager.adaptFft(dt);
     // console.log('FFT adapt:', { dt, changeFft, fftSize: fftManager.fftSize });
-    if (changeFft)
+    if (changeFft) {
         fftManager.changeFftSize(changeFft > 0 ? fftManager.fftSize << changeFft : fftManager.fftSize >> -changeFft);
+        const fftUnderSize = fftManager.fftUnderSize;
+        parameterSlider.max = fftUnderSize;
+        parametersManager.parameter = parameterSlider.valueAsNumber;
+        complexityNumber.max = fftUnderSize;
+        parametersManager.complexity = complexityNumber.valueAsNumber;
+    }
 }
 
 function redraw() {
